@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 :root {
   --background: #ffffff;
@@ -23,5 +27,45 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  /* the dark rounded-card container */
+  .card {
+    @apply bg-[#1B1B1B] rounded-2xl shadow-lg p-8;
+  }
+  /* crimson title */
+  .card-title {
+    @apply text-center text-[#FF4E42] text-2xl font-semibold mb-6;
+  }
+  /* form label styling */
+  .form-label {
+    @apply block text-[#E5E5E5] mb-1;
+  }
+  /* dark inputs with red focus ring */
+  .form-input {
+    @apply
+      w-full
+      bg-[#2C2C2C]
+      border border-[#444444]
+      rounded-md
+      py-2 px-3
+      placeholder-[#888888]
+      text-[#E5E5E5]
+      focus:outline-none focus:ring-2 focus:ring-[#FF4E42];
+  }
+  /* crimson primary button */
+  .btn-primary {
+    @apply
+      mt-2
+      w-full
+      bg-[#FF4E42]
+      hover:bg-[#E03E31]
+      text-white
+      rounded-md
+      py-2
+      font-medium
+      transition;
+  }
 }
 
