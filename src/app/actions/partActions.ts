@@ -1,6 +1,8 @@
 // File: src/app/actions/partActions.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
+
+import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 
 // Create Part
@@ -34,6 +36,7 @@ export async function createPart(form: FormData) {
       eventsHistory: []
     }
   });
+  // Do not redirect; let the client handle navigation if needed
 }
 
 // Move Part
