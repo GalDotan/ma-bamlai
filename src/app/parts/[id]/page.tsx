@@ -1,4 +1,7 @@
 import { prisma } from '@/lib/prisma';
+import MoveLocationForm from '@/components/MoveLocationForm';
+import EventSection from '@/components/EventSection';
+import { addEvent } from '@/app/actions/partActions';
 
 interface PartViewParams {
   id: string;
@@ -32,8 +35,13 @@ export default async function PartView({ params }: { params: PartViewParams }) {
             <div className="text-[#e74c3c] font-bold">{p.location}</div>
           </div>
           <div>
-      
-            <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline font-semibold">
+            <span className="font-semibold">Link:</span>
+            <a
+              href={p.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline font-semibold"
+            >
               Link
             </a>
           </div>
@@ -57,16 +65,16 @@ export default async function PartView({ params }: { params: PartViewParams }) {
           <div className="text-[#e74c3c] font-semibold space-y-1 mt-1">
             {Array.isArray(p.eventsHistory) && p.eventsHistory.map((entry: any, index: number) => (
               <div key={index}>
-                {new Date(entry.date).toLocaleDateString()} {entry.description}
+                {new Date(entry.date).toLocaleDateString()} {entry.description} ({entry.technician})
               </div>
             ))}
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="col-span-1 flex flex-col gap-3">
-          <button className="btn-primary">New Event</button>
-          <button className="btn-primary">Move</button>
+        {/* Rightmost Column: Forms */}
+        <div className="col-span-1 flex flex-col gap-4">
+          <EventSection events={Array.isArray(p.eventsHistory) ? p.eventsHistory : []} partId={p.id} addEvent={addEvent} />
+          <MoveLocationForm id={p.id} />
           <button className="btn-primary">Edit</button>
         </div>
       </div>
