@@ -3,13 +3,13 @@ generator client {
 }
 datasource db {
   provider = "mongodb"
-  url      = env("MONGODB_URI")
+  url      = "mongodb+srv://vercel-admin-user:JPr8WTkmygzW9nIg@cluster0.vtbmgit.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 }
 
 model Part {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
   name              String
-  type              String   // "component" or "consumable"
+  partType          String   // "component" or "consumable"
   year              Int
   details           String
   quantity          Int
@@ -19,4 +19,6 @@ model Part {
   eventsHistory     Json     // [{ date, description, technician }, …]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  link              String
+  typt              String 
 }

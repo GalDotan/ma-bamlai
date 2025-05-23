@@ -39,10 +39,10 @@ export default function NewPart() {
           <input id="name" name="name" required className="form-input" />
         </div>
         <div>
-          <label htmlFor="type" className="form-label">Type</label>
+          <label htmlFor="partType" className="form-label">Type</label>
           <select
-            id="type"
-            name="type"
+            id="partType"
+            name="partType"
             required
             className="form-input"
             value={type}
@@ -92,6 +92,25 @@ export default function NewPart() {
           <input
             id="location"
             name="location"
+            required
+            className="form-input"
+          />
+        </div>
+        <div>
+          <label htmlFor="link" className="form-label">Link</label>
+          <input
+            id="link"
+            name="link"
+            type="url"
+            required
+            className="form-input"
+          />
+        </div>
+        <div>
+          <label htmlFor="typt" className="form-label">Typt</label>
+          <input
+            id="typt"
+            name="typt"
             required
             className="form-input"
           />

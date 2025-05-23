@@ -9,15 +9,17 @@ import { prisma } from '@/lib/prisma';
 export async function createPart(form: FormData) {
   // Pull every field off the FormData and coerce to string
   const name       = form.get('name')?.toString()       ?? '';
-  const type       = form.get('type')?.toString()       ?? '';
+  const partType   = form.get('partType')?.toString()   ?? ''; // Updated field name
+  const typt       = form.get('typt')?.toString()       ?? ''; // New field
   const yearStr    = form.get('year')?.toString();
   const details    = form.get('details')?.toString()    ?? '';
   const quantityStr= form.get('quantity')?.toString();
   const location   = form.get('location')?.toString()   ?? '';
+  const link       = form.get('link')?.toString()       ?? ''; // Ensure link is included
 
   // Basic server‐side check
-  if (!name || !type || yearStr === undefined || quantityStr === undefined) {
-    throw new Error('Missing required fields: name, type, year, or quantity');
+  if (!name || !partType || yearStr === undefined || quantityStr === undefined || !link) {
+    throw new Error('Missing required fields: name, partType, year, quantity, or link');
   }
 
   const year     = parseInt(yearStr, 10);
@@ -26,15 +28,17 @@ export async function createPart(form: FormData) {
   await prisma.part.create({
     data: {
       name,
-      type,
+      partType, // Updated field name
+      typt,     // New field
       year,
       details,
       quantity,
       quantityHistory: [],
       location,
       locationHistory: [],
-      eventsHistory: []
-    }
+      eventsHistory: [],
+      link, // Added link field
+    },
   });
   // Do not redirect; let the client handle navigation if needed
 }
