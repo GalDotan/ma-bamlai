@@ -1,65 +1,74 @@
-// src/app/parts/[id]/page.tsx
+import { prisma } from '@/lib/prisma';
+
 interface PartViewParams {
   id: string;
 }
 
-
-import { updateQuantity, addEvent } from '@/app/actions/partActions';
-import EventSection from '@/components/EventSection';
-import MoveLocationForm from '@/components/MoveLocationForm';
-import { prisma } from '@/lib/prisma';
-
 export default async function PartView({ params }: { params: PartViewParams }) {
-  const { id } = params; // Destructure params to access id
+  const { id } = params;
   const p = await prisma.part.findUnique({ where: { id } });
-  if (!p) return <p className="text-center mt-40 text-2xl text-red-400">Not found</p>;
+  if (!p) return <p className="text-center mt-40 text-2xl text-[#e74c3c]">Not found</p>;
 
   return (
-    <div className="max-w-sm mx-auto space-y-6 mt-40 p-6 mb-3 bg-[#181A1B] rounded-2xl shadow border-3 border-[#e74c3c]/30">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="form-label">Part Name:</label>
-          <div className="text-red-500 font-semibold">{p.name}</div>
+    <div className="max-w-6xl mx-auto mt-24 p-6 rounded-2xl border-2 border-[#e74c3c] shadow-md bg-[#181A1B] text-white font-sans">
+      <div className="grid grid-cols-4 gap-6 items-start">
+
+        {/* Left Column: Part Info */}
+        <div className="col-span-1 space-y-3">
+          <div>
+            <span className="font-semibold">Part Name:</span>
+            <div className="text-[#e74c3c] font-bold">{p.name}</div>
+          </div>
+          <div>
+            <span className="font-semibold">Type:</span>
+            <div className="text-[#e74c3c] font-bold">{p.partType}</div>
+          </div>
+          <div>
+            <span className="font-semibold">Year:</span>
+            <div className="text-[#e74c3c] font-bold">{p.year}</div>
+          </div>
+          <div>
+            <span className="font-semibold">Location:</span>
+            <div className="text-[#e74c3c] font-bold">{p.location}</div>
+          </div>
+          <div>
+      
+            <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline font-semibold">
+              Link
+            </a>
+          </div>
         </div>
-        <div>
-          <label className="form-label">Location History:</label>
-          <div className="text-red-500 font-semibold">
-            {Array.isArray(p.locationHistory) && p.locationHistory.map((entry, index) => (
-              <div key={index}>{typeof entry === 'string' ? entry : JSON.stringify(entry)}</div>
+
+        {/* Middle Column: Location History */}
+        <div className="col-span-1">
+          <span className="font-semibold">Location History:</span>
+          <div className="text-[#e74c3c] font-semibold space-y-1 mt-1">
+            {Array.isArray(p.locationHistory) && p.locationHistory.map((entry: any, index: number) => (
+              <div key={index}>
+                {new Date(entry.date).toLocaleDateString()} {entry.to}
+              </div>
             ))}
           </div>
         </div>
-        <div>
-          <label className="form-label">Type:</label>
-          <div className="text-red-500 font-semibold">{p.partType}</div>
-        </div>
-        <div>
-          <label className="form-label">Event History:</label>
-          <div className="text-red-500 font-semibold">
-            {Array.isArray(p.eventsHistory) && p.eventsHistory.map((entry, index) => (
-              <div key={index}>{typeof entry === 'string' ? entry : JSON.stringify(entry)}</div>
+
+        {/* Right Column: Event History */}
+        <div className="col-span-1">
+          <span className="font-semibold">Event History:</span>
+          <div className="text-[#e74c3c] font-semibold space-y-1 mt-1">
+            {Array.isArray(p.eventsHistory) && p.eventsHistory.map((entry: any, index: number) => (
+              <div key={index}>
+                {new Date(entry.date).toLocaleDateString()} {entry.description}
+              </div>
             ))}
           </div>
         </div>
-        <div>
-          <label className="form-label">Year:</label>
-          <div className="text-red-500 font-semibold">{p.year}</div>
+
+        {/* Buttons */}
+        <div className="col-span-1 flex flex-col gap-3">
+          <button className="btn-primary">New Event</button>
+          <button className="btn-primary">Move</button>
+          <button className="btn-primary">Edit</button>
         </div>
-        <div>
-          <label className="form-label">Location:</label>
-          <div className="text-red-500 font-semibold">{p.location}</div>
-        </div>
-        <div>
-          <label className="form-label">Link:</label>
-          <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-            {p.link}
-          </a>
-        </div>
-      </div>
-      <div className="flex flex-col space-y-2 mt-4">
-        <button className="btn-primary">New Event</button>
-        <button className="btn-primary">Move</button>
-        <button className="btn-primary">Edit</button>
       </div>
     </div>
   );
