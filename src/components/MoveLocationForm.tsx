@@ -30,7 +30,7 @@ export default function MoveLocationForm({ id }: { id: string }) {
       />
       <button
         type="submit"
-        className="btn-primary h-11 px-4 text-sm rounded-md flex items-center"
+        className="btn-primary h-11 px-2 py-2 text-sm rounded-md flex items-center"
         style={{ marginTop: 0, marginBottom: 0, alignSelf: 'center' }}
         disabled={isPending}
       >

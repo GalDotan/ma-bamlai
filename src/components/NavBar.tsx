@@ -1,12 +1,20 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 
-export default function NavBar() {
+export default function NavBar({ onSearch }: { onSearch: (query: string) => void }) {
     const [search, setSearch] = useState("");
     const router = useRouter();
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            onSearch(search);
+        }, 300); // Debounce search input
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [search, onSearch]);
 
     return (
         <header className="backdrop-blur bg-gray-900/95 shadow-xl grid grid-cols-3 items-center fixed top-0 left-0 w-full z-50 h-20">
