@@ -19,7 +19,7 @@ export default function MoveLocationForm({ id }: { id: string }) {
   }
 
   return (
-    <form onSubmit={handleMove} className="flex gap-2 mt-2 items-center">
+    <form onSubmit={handleMove} className="flex gap-2  items-center">
       <input type="hidden" name="id" value={id} />
       <input
         name="location"
@@ -30,11 +30,11 @@ export default function MoveLocationForm({ id }: { id: string }) {
       />
       <button
         type="submit"
-        className="btn-primary h-11 px-2 py-2 text-sm rounded-md flex items-center"
+        className="btn-primary h-11 px-2 py-2 text-sm rounded-md flex items-center justify-center"
         style={{ marginTop: 0, marginBottom: 0, alignSelf: 'center' }}
         disabled={isPending}
       >
-        Move
+        <span className="text-lg py-3 px-6">Move</span>
       </button>
     </form>
   );

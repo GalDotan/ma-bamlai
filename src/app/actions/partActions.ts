@@ -89,3 +89,35 @@ export async function updateQuantity(form: FormData) {
     data: { quantity: newQty, quantityHistory: hist }
   });
 }
+
+export async function updatePart(id: string, form: FormData) {
+  const name = form.get('name')?.toString() ?? '';
+  const partType = form.get('partType')?.toString() ?? '';
+  const typt = form.get('typt')?.toString() ?? '';
+  const yearStr = form.get('year')?.toString();
+  const details = form.get('details')?.toString() ?? '';
+  const quantityStr = form.get('quantity')?.toString();
+  const location = form.get('location')?.toString() ?? '';
+  const link = form.get('link')?.toString() ?? '';
+
+  if (!name || !partType || !yearStr || !quantityStr || !location || !link) {
+    throw new Error('Missing required fields');
+  }
+
+  const year = parseInt(yearStr, 10);
+  const quantity = parseInt(quantityStr, 10);
+
+  await prisma.part.update({
+    where: { id },
+    data: {
+      name,
+      partType,
+      typt,
+      year,
+      details,
+      quantity,
+      location,
+      link,
+    },
+  });
+}
