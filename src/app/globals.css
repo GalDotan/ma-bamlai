@@ -69,5 +69,22 @@ body {
       font-medium
       transition;
   }
+  
+  /* Mobile responsive utilities */
+  .mobile-text-sm {
+    @apply text-sm md:text-base;
+  }
+  
+  .mobile-padding {
+    @apply p-4 md:p-6;
+  }
+  
+  .mobile-margin-top {
+    @apply mt-24 md:mt-32;
+  }
+  
+  .mobile-grid-stack {
+    @apply grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8;
+  }
 }
 

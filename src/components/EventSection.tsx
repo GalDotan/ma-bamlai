@@ -1,40 +1,16 @@
 "use client";
-import { useRef, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { SubmitButton } from './SubmitButton';
 
-
-export default function EventSection({ events, partId, addEvent }: {
-  events: any[];
+export default function EventSection({ partId, addEvent }: {
   partId: string;
-  addEvent: (formData: FormData) => Promise<any>;
+  addEvent: (formData: FormData) => Promise<void>;
 }) {
-  const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  function toggleForm() {
-    if (formRef.current) {
-      formRef.current.classList.toggle("hidden");
-    }
-  }
-
-  async function handleAddEvent(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    await addEvent(formData);
-    form.reset();
-    startTransition(() => {
-      router.refresh();
-    });
-  }
-
   return (
-      <form onSubmit={handleAddEvent} className="flex flex-col gap-2 mt-2 ">
+      <form action={addEvent} className="flex flex-col gap-2 mt-2">
         <input type="hidden" name="id" value={partId} />
-        <input name="description" placeholder="Event description" required className="form-input" />
-        <input name="technician" placeholder="Technician" required className="form-input" />
-        <button type="submit" className="btn-primary" disabled={isPending}>Add Event</button>
+        <input name="description" placeholder="Event description" required className="form-input text-sm md:text-base" />
+        <input name="technician" placeholder="Technician" required className="form-input text-sm md:text-base" />
+        <SubmitButton pendingText="Adding..." className="btn-primary text-sm md:text-base">Add Event</SubmitButton>
       </form>
   );
 }

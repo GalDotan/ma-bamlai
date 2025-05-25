@@ -1,48 +1,103 @@
-"use client";
-
 import { PartCard } from "@/components/PartCard";
-import { prisma } from "@/lib/prisma";
-import { useState, useEffect } from "react";
-import NavBar from "@/components/NavBar"; // Adjust the import based on your file structure
+import { getParts } from "@/app/actions/partActions";
+import NavBar from "@/components/NavBar";
 
-export default function PartsList() {
-  const [parts, setParts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+interface PartsPageProps {
+  searchParams: Promise<{ 
+    search?: string;
+    partTypes?: string;
+    locations?: string;
+    sortBy?: 'name' | 'year' | 'lastEvent' | 'locationHistory';
+    yearMin?: string;
+    yearMax?: string;
+    eventMin?: string;
+    eventMax?: string;
+  }>;
+}
 
-  useEffect(() => {
-    async function fetchParts() {
-      const response = await fetch(
-        `/api/parts?search=${encodeURIComponent(searchQuery)}`
-      );
-      const data = await response.json();
-      setParts(data);
-    }
+interface FilterParams {
+  partTypes?: string[];
+  locations?: string[];
+  sortBy?: 'name' | 'year' | 'lastEvent' | 'locationHistory';
+  yearRange?: [number, number];
+  lastEventRange?: [number, number];
+}
 
-    fetchParts();
-  }, [searchQuery]);
+function parseFilters(searchParams: Record<string, string | undefined>): FilterParams | undefined {
+  const filters: FilterParams = {};
+  
+  if (searchParams.partTypes) {
+    filters.partTypes = searchParams.partTypes.split(',').filter(Boolean);
+  }
+  
+  if (searchParams.locations) {
+    filters.locations = searchParams.locations.split(',').filter(Boolean);
+  }
+  
+  if (searchParams.sortBy) {
+    filters.sortBy = searchParams.sortBy as 'name' | 'year' | 'lastEvent' | 'locationHistory';
+  }
+  
+  if (searchParams.yearMin || searchParams.yearMax) {
+    const currentYear = new Date().getFullYear();
+    filters.yearRange = [
+      searchParams.yearMin ? parseInt(searchParams.yearMin) : 2000,
+      searchParams.yearMax ? parseInt(searchParams.yearMax) : currentYear
+    ];
+  }
+  
+  if (searchParams.eventMin || searchParams.eventMax) {
+    filters.lastEventRange = [
+      searchParams.eventMin ? parseInt(searchParams.eventMin) : 0,
+      searchParams.eventMax ? parseInt(searchParams.eventMax) : 365
+    ];
+  }
+  
+  return Object.keys(filters).length > 0 ? filters : undefined;
+}
 
-  // Card sizing
-  const CARD_WIDTH = "270px";
-  const CARD_HEIGHT = "200px";
+export default async function PartsList({ searchParams }: PartsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const search = resolvedSearchParams.search || '';
+  const filters = parseFilters(resolvedSearchParams);
+  const parts = await getParts(search, filters);
 
   return (
-    <div className="pt-32 px-4">
-      <NavBar onSearch={setSearchQuery} />
-      <div
-        className="mx-auto w-full grid gap-2 overflow-auto"
-        style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${CARD_WIDTH}, 1fr))`, gap: '8px' }}
-      >
-        {parts.map((part: any) => (
-          <div key={part.id} style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}>
-            <PartCard
-              id={part.id}
-              name={part.name}
-              partType={part.partType}
-              location={part.location}
-              quantity={part.quantity}
-            />
-          </div>
-        ))}
+    <div className="pt-20 md:pt-32 px-2 md:px-4">
+      <NavBar />
+      <div className="mx-auto w-full max-w-7xl">
+        {/* Mobile: Single column, full width cards */}
+        <div className="block md:hidden space-y-4">
+          {parts.map((part) => (
+            <div key={part.id} className="w-full">
+              <PartCard
+                id={part.id}
+                name={part.name}
+                partType={part.partType}
+                location={part.location}
+                quantity={part.quantity}
+              />
+            </div>
+          ))}
+        </div>
+        
+        {/* Desktop: Grid layout */}
+        <div className="hidden md:grid gap-2 overflow-auto" style={{ 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
+          gap: '8px'
+        }}>
+          {parts.map((part) => (
+            <div key={part.id} style={{ width: '270px', height: '200px' }}>
+              <PartCard
+                id={part.id}
+                name={part.name}
+                partType={part.partType}
+                location={part.location}
+                quantity={part.quantity}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

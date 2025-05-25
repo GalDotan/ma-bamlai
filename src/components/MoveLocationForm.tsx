@@ -1,41 +1,23 @@
 "use client";
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { movePart } from '@/app/actions/partActions';
+import { SubmitButton } from './SubmitButton';
 
 export default function MoveLocationForm({ id }: { id: string }) {
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
-
-  async function handleMove(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    await movePart(formData);
-    form.reset();
-    startTransition(() => {
-      router.refresh();
-    });
-  }
-
   return (
-    <form onSubmit={handleMove} className="flex gap-2  items-center">
+    <form action={movePart} className="flex flex-col gap-2">
       <input type="hidden" name="id" value={id} />
       <input
         name="location"
         placeholder="New location"
         required
-        className="form-input h-11 px-3"
-        style={{ minWidth: 0 }}
+        className="form-input h-11 px-3 w-full"
       />
-      <button
-        type="submit"
-        className="btn-primary h-11 px-2 py-2 text-sm rounded-md flex items-center justify-center"
-        style={{ marginTop: 0, marginBottom: 0, alignSelf: 'center' }}
-        disabled={isPending}
+      <SubmitButton 
+        className="btn-primary h-11 px-4 py-2 text-sm md:text-lg rounded-md flex items-center justify-center w-full" 
+        pendingText="Moving..."
       >
-        <span className="text-lg py-3 px-6">Move</span>
-      </button>
+        Move
+      </SubmitButton>
     </form>
   );
 }
