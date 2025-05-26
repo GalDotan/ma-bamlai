@@ -52,12 +52,10 @@ export default function NewPart() {
           <input id="year" name="year" type="text" pattern="[0-9]*" inputMode="numeric" required className="form-input text-sm md:text-base" />
         </div>
         <div>
-          <label htmlFor="details" className="form-label text-sm md:text-base">Details</label>
-          <textarea
+          <label htmlFor="details" className="form-label text-sm md:text-base">Details</label>          <textarea
             id="details"
             name="details"
             rows={3}
-            required
             className="form-input text-sm md:text-base"
           />
         </div>

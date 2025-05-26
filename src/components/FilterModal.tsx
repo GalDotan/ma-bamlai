@@ -100,7 +100,7 @@ export default function FilterModal({
 
   if (!isOpen) return null;
   return (
-    <div className="mt-100 fixed inset-0 bg-black w-screen h-screen z-[60] flex items-center justify-center p-4">
+    <div className="mt-1/2 fixed inset-0 bg-[#1b1b1bc2] w-screen h-screen z-[60] flex items-center justify-center p-4">
       <div className="bg-[#181A1B] rounded-2xl border-2 border-[#e74c3c] w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
@@ -220,96 +220,9 @@ export default function FilterModal({
             </div>
           </div>
 
-          {/* Sort By */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Sort By
-            </label>
-            <select
-              value={filters.sortBy}
-              onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#e74c3c]"
-            >
-              <option value="name">Part Name</option>
-              <option value="year">Year</option>
-              <option value="lastEvent">Last Event</option>
-              <option value="locationHistory">Location History</option>
-            </select>
-          </div>
-
-          {/* Year Range */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Year Range: {filters.yearRange[0]} - {filters.yearRange[1]}
-            </label>
-            <div className="space-y-2">
-              <div>
-                <label className="text-xs text-gray-400">From Year</label>
-                <input
-                  type="range"
-                  min="2000"
-                  max={new Date().getFullYear()}
-                  value={filters.yearRange[0]}
-                  onChange={(e) => setFilters(prev => ({
-                    ...prev,
-                    yearRange: [parseInt(e.target.value), prev.yearRange[1]]
-                  }))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-400">To Year</label>
-                <input
-                  type="range"
-                  min="2000"
-                  max={new Date().getFullYear()}
-                  value={filters.yearRange[1]}
-                  onChange={(e) => setFilters(prev => ({
-                    ...prev,
-                    yearRange: [prev.yearRange[0], parseInt(e.target.value)]
-                  }))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Last Event Range */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Last Event (Days Ago): {filters.lastEventRange[0]} - {filters.lastEventRange[1]}
-            </label>
-            <div className="space-y-2">
-              <div>
-                <label className="text-xs text-gray-400">From (Days Ago)</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="365"
-                  value={filters.lastEventRange[0]}
-                  onChange={(e) => setFilters(prev => ({
-                    ...prev,
-                    lastEventRange: [parseInt(e.target.value), prev.lastEventRange[1]]
-                  }))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-400">To (Days Ago)</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="365"
-                  value={filters.lastEventRange[1]}
-                  onChange={(e) => setFilters(prev => ({
-                    ...prev,
-                    lastEventRange: [prev.lastEventRange[0], parseInt(e.target.value)]
-                  }))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
-            </div>
-          </div>
+          
+          
+          
         </div>
 
         {/* Footer */}

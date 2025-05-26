@@ -6,13 +6,12 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 
 // Create Part
-export async function createPart(form: FormData) {
-  // Pull every field off the FormData and coerce to string
+export async function createPart(form: FormData) {  // Pull every field off the FormData and coerce to string
   const name       = form.get('name')?.toString()       ?? '';
   const partType   = form.get('partType')?.toString()   ?? ''; // Updated field name
   const typt       = form.get('typt')?.toString()       ?? ''; // New field
   const yearStr    = form.get('year')?.toString();
-  const details    = form.get('details')?.toString()    ?? '';
+  const details    = form.get('details')?.toString()    || '';  // Make details optional but default to empty string
   const quantityStr= form.get('quantity')?.toString();
   const location   = form.get('location')?.toString()   ?? '';
   const link       = form.get('link')?.toString()       ?? ''; // Ensure link is included
@@ -24,6 +23,16 @@ export async function createPart(form: FormData) {
 
   const year     = parseInt(yearStr, 10);
   const quantity = parseInt(quantityStr, 10);
+
+  // Create initial location history entry
+  const initialLocationHistory = [
+    {
+      date: new Date(),
+      from: null,
+      to: location
+    }
+  ];
+
   await prisma.part.create({
     data: {
       name,
@@ -34,7 +43,7 @@ export async function createPart(form: FormData) {
       quantity,
       quantityHistory: [],
       location,
-      locationHistory: [],
+      locationHistory: initialLocationHistory,
       eventsHistory: [],
       link, // Added link field
     },
