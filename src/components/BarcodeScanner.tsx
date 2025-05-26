@@ -64,15 +64,37 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           inputStream: {
             type: 'LiveStream',
             target: container as Element,
-            constraints: { facingMode: 'environment' },
+            constraints: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
           },
-          decoder: { readers: ['code_128_reader'] },
+          locator: {
+            patchSize: 'medium',
+            halfSample: false,
+          },
+          decoder: {
+            readers: ['code_128_reader'],
+            debug: {
+              drawBoundingBox: true,
+              showFrequency: true,
+              drawScanline: true,
+              showPattern: true,
+            },
+          },
           locate: true,
+          numOfWorkers: navigator.hardwareConcurrency || 4,
         },
         (err) => {
           if (err) {
             console.error('Quagga init error:', err);
-            setError('Failed to initialize camera.');
+            setError(
+              'Failed to initialize camera. ' +
+              (err.name ? `${err.name}: ` : '') +
+              (err.message || err.toString() || '') +
+              '\nTry closing other apps/tabs using the camera or check browser permissions.'
+            );
             setInitializing(false);
             return;
           }
