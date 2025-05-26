@@ -1,7 +1,8 @@
-import './globals.css';
-import NavBar  from '@/components/NavBar'
+'use client'          // mark this as a client component
+import { Suspense, ReactNode } from 'react'
+import NavBar from '@/components/NavBar'
 import { ToastContainer } from 'react-toastify'
-import { ReactNode } from 'react';
+import './globals.css';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,8 +11,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         suppressHydrationWarning
         className="bg-surface text-white min-h-screen">
-          <NavBar />
-          <ToastContainer />
+          <Suspense fallback={null}>
+            <NavBar />
+          </Suspense>
+          <Suspense fallback={null}>
+            <ToastContainer />
+          </Suspense>
         <main className="p-4">{children}</main>
       </body>
     </html>
