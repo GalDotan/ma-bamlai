@@ -186,12 +186,7 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
         frequency: 10,
         decoder: {
           readers: [
-            "code_128_reader",
-            "ean_reader",
-            "ean_8_reader",
-            "code_39_reader",
-            "upc_reader",
-            "upc_e_reader"
+            "code_128_reader"
           ]
         },
         locate: true
