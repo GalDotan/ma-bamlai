@@ -13,15 +13,25 @@ export function BarcodeDisplay({ barcode, name }: BarcodeDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (canvasRef.current && barcode) {      JsBarcode(canvasRef.current, barcode, {
+    if (canvasRef.current && barcode) {
+      // Render at 3x resolution for sharpness
+      const scale = 3;
+      const width = 300 * scale;
+      const height = 100 * scale;
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+      JsBarcode(canvasRef.current, barcode, {
         format: "CODE128",
-        width: 1.5,
-        height: 50,
+        width: 1.5 * scale,
+        height: 50 * scale,
         displayValue: true,
-        fontSize: 12,
-        margin: 5,
+        fontSize: 12 * scale,
+        margin: 5 * scale,
         background: "#ffffff"
       });
+      // Downscale for display
+      canvasRef.current.style.width = '300px';
+      canvasRef.current.style.height = '100px';
     }
   }, [barcode]);
 
