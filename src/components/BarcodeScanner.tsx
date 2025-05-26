@@ -105,8 +105,8 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
         return;
       }
 
-      // Initialize Quagga with a small delay to ensure video is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Initialize Quagga with a longer delay to ensure video is ready
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Stop any existing Quagga instance
       try {
