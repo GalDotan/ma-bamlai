@@ -1,20 +1,87 @@
 'use client';
 
 import { getPart, updatePart } from '@/app/actions/partActions';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
+// Raw data types that match the JSON structure
+interface BaseHistoryEntry {
+  date: string;
+}
+
+interface RawQuantityHistoryEntry extends BaseHistoryEntry {
+  prevQuantity?: number;
+  newQuantity?: number;
+  from?: number;
+  to?: number;
+}
+
+interface RawLocationHistoryEntry extends BaseHistoryEntry {
+  from: string | null;
+  to: string;
+}
+
+interface RawEventHistoryEntry extends BaseHistoryEntry {
+  description: string;
+  technician: string;
+}
+
+// Processed types with proper Date objects
+interface QuantityHistoryEntry {
+  date: Date;
+  from: number;
+  to: number;
+}
+
+interface LocationHistoryEntry {
+  date: Date;
+  from: string | null;
+  to: string;
+}
+
+interface EventHistoryEntry {
+  date: Date;
+  description: string;
+  technician: string;
+}``
+
+// Raw data from Prisma
+interface RawPartData {
+  id: string;
+  name: string;
+  partType: string;
+  typt: string;
+  year: number;
+  details: string | null;
+  quantity: number;
+  location: string;
+  link: string;
+  barcode: string;
+  quantityHistory: RawQuantityHistoryEntry[];
+  locationHistory: RawLocationHistoryEntry[];
+  eventsHistory: RawEventHistoryEntry[];
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+// Processed Part type
 interface Part {
   id: string;
   name: string;
   partType: string;
   typt: string;
   year: number;
-  details: string;
+  details: string | null;
   quantity: number;
   location: string;
   link: string;
+  barcode: string;
+  quantityHistory: QuantityHistoryEntry[];
+  locationHistory: LocationHistoryEntry[];
+  eventsHistory: EventHistoryEntry[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default function EditPartPage() {
@@ -23,29 +90,71 @@ export default function EditPartPage() {
   const [part, setPart] = useState<Part | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const parseHistoryEntries = useCallback((data: unknown): Part => {
+    const rawData = data as RawPartData;
+    return {
+      ...rawData,
+      createdAt: new Date(rawData.createdAt),
+      updatedAt: new Date(rawData.updatedAt),
+      quantityHistory: (rawData.quantityHistory ?? []).map(entry => ({
+        date: new Date(entry.date),
+        from: entry.prevQuantity ?? entry.from ?? 0,
+        to: entry.newQuantity ?? entry.to ?? 0
+      })),
+      locationHistory: (rawData.locationHistory ?? []).map(entry => ({
+        date: new Date(entry.date),
+        from: entry.from,
+        to: entry.to
+      })),
+      eventsHistory: (rawData.eventsHistory ?? []).map(entry => ({
+        date: new Date(entry.date),
+        description: entry.description,
+        technician: entry.technician
+      }))
+    };
+  }, []);
+
   useEffect(() => {
-    async function fetchPart() {      try {
+    async function fetchPart() {
+      try {
         const partData = await getPart(id as string);
-        setPart(partData);
+        const parsedPart = parseHistoryEntries(partData);
+        setPart(parsedPart);
       } catch {
         console.error('Failed to fetch part');
         toast.error('Failed to load part');
       }
     }
     fetchPart();
-  }, [id]);
+  }, [id, parseHistoryEntries]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    startTransition(async () => {      try {
+    // Type-safe form data validation
+    const year = parseInt(formData.get('year') as string);
+    const quantity = parseInt(formData.get('quantity') as string);
+
+    if (isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
+      toast.error('Please enter a valid year');
+      return;
+    }
+
+    if (isNaN(quantity) || quantity < 0) {
+      toast.error('Please enter a valid quantity');
+      return;
+    }
+
+    startTransition(async () => {
+      try {
         await updatePart(id as string, formData);
         toast.success('Part updated!');
         router.push(`/parts/${id}`);
-      } catch {
-        toast.error('Failed to update part');
+      } catch (error) {
+        console.error('Error updating part:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to update part');
       }
     });
   }
@@ -88,12 +197,10 @@ export default function EditPartPage() {
         </div>
         <div>
           <label htmlFor="details" className="form-label text-sm md:text-base">Details</label>
-          <textarea
-            id="details"
+          <textarea id="details"
             name="details"
             rows={3}
-            defaultValue={part.details}
-            required
+            defaultValue={part.details || ''}
             className="form-input text-sm md:text-base"
           />
         </div>

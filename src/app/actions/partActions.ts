@@ -1,9 +1,19 @@
 // File: src/app/actions/partActions.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
+
+// Type guard for location history (used in movePart)
+function isLocationHistory(arr: unknown): arr is { date: string; from: string | null; to: string }[] {
+  return Array.isArray(arr) && arr.every(entry =>
+    entry && typeof entry === 'object' &&
+    'date' in entry && typeof (entry as Record<string, unknown>).date === 'string' &&
+    'from' in entry && (typeof (entry as Record<string, unknown>).from === 'string' || (entry as Record<string, unknown>).from === null) &&
+    'to' in entry && typeof (entry as Record<string, unknown>).to === 'string'
+  );
+}
 
 // Create Part
 export async function createPart(form: FormData) {  // Pull every field off the FormData and coerce to string
@@ -77,11 +87,15 @@ export async function movePart(form: FormData) {
   const newLocation = form.get('location')?.toString() ?? '';
   if (!id || !newLocation) throw new Error('Missing id or new location');
   const part = await prisma.part.findUnique({ where: { id } });
-  if (!part) throw new Error('Part not found');
-  const hist = (part.locationHistory as any[]) || [];
-  hist.push({ date: new Date(), from: part.location, to: newLocation });  await prisma.part.update({
+  if (!part) throw new Error('Part not found');  const locationHistory = isLocationHistory(part.locationHistory) ? part.locationHistory : [];
+  locationHistory.push({
+    date: new Date().toISOString(),
+    from: part.location,
+    to: newLocation
+  });
+  await prisma.part.update({
     where: { id },
-    data: { location: newLocation, locationHistory: hist }
+    data: { location: newLocation, locationHistory }
   });
   
   revalidatePath('/parts');
@@ -90,18 +104,25 @@ export async function movePart(form: FormData) {
 
 // Add Event (components only)
 export async function addEvent(form: FormData) {
-  const id          = form.get('id')?.toString()           ?? '';
+  const id = form.get('id')?.toString() ?? '';
   const description = form.get('description')?.toString() ?? '';
-  const technician  = form.get('technician')?.toString()  ?? '';
+  const technician = form.get('technician')?.toString() ?? '';
   if (!id || !description || !technician) throw new Error('Missing event data');
-  const part = await prisma.part.findUnique({ where: { id } });
-  if (!part) throw new Error('Part not found');
-  const evs = (part.eventsHistory as any[]) || [];
-  evs.push({ date: new Date(), description, technician });  await prisma.part.update({
+  const part = await prisma.part.findUnique({
     where: { id },
-    data: { eventsHistory: evs }
+    select: { eventsHistory: true }
   });
-  
+  if (!part) throw new Error('Part not found');
+  const eventsHistory = Array.isArray(part.eventsHistory) ? part.eventsHistory as { date: string; description: string; technician: string }[] : [];
+  eventsHistory.push({
+    date: new Date().toISOString(),
+    description,
+    technician
+  });
+  await prisma.part.update({
+    where: { id },
+    data: { eventsHistory }
+  });
   revalidatePath('/parts');
   revalidatePath(`/parts/${id}`);
 }
@@ -114,10 +135,15 @@ export async function updateQuantity(form: FormData) {
   const part = await prisma.part.findUnique({ where: { id } });
   if (!part) throw new Error('Part not found');
   const newQty = parseInt(newQtyStr, 10);
-  const hist = (part.quantityHistory as any[]) || [];
-  hist.push({ date: new Date(), prev: part.quantity, new: newQty });  await prisma.part.update({
+  const quantityHistory = Array.isArray(part.quantityHistory) ? part.quantityHistory as { date: string; prev: number; new: number }[] : [];
+  quantityHistory.push({
+    date: new Date().toISOString(),
+    prev: part.quantity,
+    new: newQty
+  });
+  await prisma.part.update({
     where: { id },
-    data: { quantity: newQty, quantityHistory: hist }
+    data: { quantity: newQty, quantityHistory }
   });
   
   revalidatePath('/parts');
@@ -242,22 +268,17 @@ export async function getParts(search: string = '', filters?: FilterParams) {
   if (filters?.lastEventRange) {
     const now = new Date();
     const [minDays, maxDays] = filters.lastEventRange;
-    
     filteredParts = parts.filter(part => {
-      const events = (part.eventsHistory as any[]) || [];
+      const events = Array.isArray(part.eventsHistory) ? part.eventsHistory as { date: string }[] : [];
       if (events.length === 0) {
-        // No events - consider this as very old
         return maxDays >= 365;
       }
-      
       const lastEvent = events[events.length - 1];
       const lastEventDate = new Date(lastEvent.date);
       const daysSinceLastEvent = Math.floor((now.getTime() - lastEventDate.getTime()) / (1000 * 60 * 60 * 24));
-      
       return daysSinceLastEvent >= minDays && daysSinceLastEvent <= maxDays;
     });
   }
-  
   return filteredParts;
 }
 

@@ -1,14 +1,9 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Camera } from 'lucide-react';
 import Quagga from '@ericblade/quagga2';
-
-interface QuaggaResult {
-  codeResult: {
-    code: string | null;
-  };
-}
 
 interface BarcodeScannerProps {
   isOpen: boolean;
@@ -17,13 +12,12 @@ interface BarcodeScannerProps {
 
 export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLDivElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const router = useRouter();
   const [error, setError] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState(false);
   const [hasInitializedCamera, setHasInitializedCamera] = useState(false);
 
-  const checkBrowserSupport = useCallback(() => {
+  const checkBrowserSupport = () => {
     // Check HTTPS
     if (typeof window !== 'undefined' && window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
       setError('Camera access requires HTTPS. Please use a secure connection.');
@@ -41,11 +35,10 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
     }
 
     return true;
-  }, []);
+  };
 
-  const initializeScanner = useCallback(async () => {
+  const initializeScanner = async () => {
     if (!videoRef.current) return;
-    videoRef.current.innerHTML = ''; // Clear any previous content
     setIsInitializing(true);
     setError('');
 
@@ -63,11 +56,6 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
         return;
       }
 
-      // Stop any existing streams
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-
       // Request camera access
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -78,20 +66,8 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           }
         });
         
-        streamRef.current = stream;
-
-        // Create a video element to ensure stream is ready
-        const videoElement = document.createElement('video');
-        videoElement.srcObject = stream;
-        videoElement.play();
-
-        // Wait for video to be ready
-        await new Promise<void>((resolve) => {
-          videoElement.onloadedmetadata = () => {
-            resolve();
-          };
-        });
-
+        // Stop the test stream
+        stream.getTracks().forEach(track => track.stop());
       } catch (err) {
         console.error('Camera permission error:', err);
         if (err instanceof Error) {
@@ -105,16 +81,7 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
         return;
       }
 
-      // Initialize Quagga with a small delay to ensure video is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Stop any existing Quagga instance
-      try {
-        await Quagga.stop();
-      } catch {
-        // Ignore errors from stopping non-existent instance
-      }
-
+      // Initialize Quagga
       await Quagga.init({
         inputStream: {
           name: "Live",
@@ -156,32 +123,19 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
     } finally {
       setIsInitializing(false);
     }
-  }, [checkBrowserSupport, videoRef]);
+  };
 
   useEffect(() => {
-    if (!isOpen) {
-      // Clean up when modal is closed
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      try {
-        Quagga.stop();
-      } catch {
-        // Ignore errors from stopping non-existent instance
-      }
-      setHasInitializedCamera(false);
-      return;
-    }
+    if (!isOpen) return;
     
-    void initializeScanner();
+    initializeScanner();
 
-    const onDetected = (result: QuaggaResult) => {
-      if (result.codeResult?.code) {
-        console.log('Barcode detected:', result.codeResult.code);
+    const onDetected = (data: any) => {
+      if (data.codeResult?.code) {
+        console.log('Barcode detected:', data.codeResult.code);
         Quagga.stop();
         onClose();
-        router.push(`/parts?barcode=${result.codeResult.code}`);
+        router.push(`/parts?barcode=${data.codeResult.code}`);
       }
     };
 
@@ -189,17 +143,9 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
 
     return () => {
       Quagga.offDetected(onDetected);
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      try {
-        Quagga.stop();
-      } catch {
-        // Ignore errors from stopping non-existent instance
-      }
+      Quagga.stop();
     };
-  }, [isOpen, onClose, router, initializeScanner]);
+  }, [isOpen, onClose, router]);
 
   if (!isOpen) return null;
 
