@@ -6,6 +6,8 @@ import { Filter } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import FilterModal from "./FilterModal";
 import { getAllLocations } from "@/app/actions/partActions";
+import { Camera, BarChart } from 'lucide-react';
+import { BarcodeScanner } from './BarcodeScanner';
 
 interface FilterState {
   partTypes: string[]; // Changed to array for multi-select
@@ -18,6 +20,7 @@ interface FilterState {
 export default function NavBar() {
     const [search, setSearch] = useState("");
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [allLocations, setAllLocations] = useState<string[]>([]);
     const [filters, setFilters] = useState<FilterState>({
       partTypes: [],
@@ -155,7 +158,9 @@ export default function NavBar() {
         <header className="backdrop-blur bg-gray-900/95 grid grid-cols-3 md:grid-cols-3 items-center fixed top-0 left-0 w-full z-50 h-16 md:h-20 px-2 md:px-0">
             <div className="col-start-1 flex items-center gap-2 md:gap-3 justify-self-start ml-2 md:ml-10">
                 <span className="text-lg md:text-2xl font-extrabold tracking-tight text-white drop-shadow">MAbmlai</span>
-            </div>            <div className="col-start-2 flex justify-center w-full px-2 md:px-0">
+            </div>
+
+            <div className="col-start-2 flex justify-center w-full px-2 md:px-0">
                 <div className="flex items-center gap-1 md:gap-2 w-full max-w-xs md:max-w-md">
                     <div className="relative flex-1">
                         <input
@@ -163,7 +168,6 @@ export default function NavBar() {
                             value={search}
                             onChange={e => {
                                 setSearch(e.target.value);
-                                // If user starts typing while not on parts page, navigate to parts
                                 if (pathname !== '/parts' && e.target.value.trim()) {
                                     router.push('/parts');
                                 }
@@ -179,7 +183,6 @@ export default function NavBar() {
                         </span>
                     </div>
                     
-                    {/* Filter Button - Only show on parts page */}
                     {pathname === '/parts' && (
                         <button
                             onClick={() => setIsFilterModalOpen(true)}
@@ -195,32 +198,54 @@ export default function NavBar() {
                     )}
                 </div>
             </div>
+
             <div className="col-start-3 flex items-center gap-1 md:gap-4 justify-self-end mr-2 md:mr-10">
-                <div className="flex gap-1 md:gap-2">                    <button
-                        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md"
+                <div className="flex gap-1 md:gap-2">
+                    <button
+                        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
+                        aria-label="Scan barcode"
+                        onClick={() => setIsScannerOpen(true)}
+                    >
+                        <Camera className="w-4 h-4 md:w-6 md:h-6 text-[#e74c3c] group-hover:text-white" />
+                    </button>
+                    <button
+                        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
+                        aria-label="Go to management"
+                        onClick={() => router.push('/manage')}
+                    >
+                        <BarChart className="w-4 h-4 md:w-6 md:h-6 text-[#e74c3c] group-hover:text-white" />
+                    </button>
+                    <button
+                        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
                         aria-label="Create new part"
                         onClick={() => router.push('/parts/new')}
                     >
-                        <svg width="18" height="18" className="md:w-7 md:h-7 transition-colors duration-150 group-hover:stroke-white" fill="none" stroke="#e74c3c" strokeWidth="3" viewBox="0 0 24 24">
+                        <svg width="18" height="18" className="md:w-7 md:h-7 text-[#e74c3c] transition-colors duration-150 group-hover:text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                         </svg>
-                    </button>                    <button
-                        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md"
+                    </button>
+                    <button
+                        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
                         aria-label="Go to parts"
                         onClick={() => router.push('/parts')}
                     >
-                        <CiGrid41 size={18} className="md:text-[28px] text-[#e74c3c] transition-colors duration-150 group-hover:stroke-white" />
-                    </button>                </div>
+                        <CiGrid41 size={18} className="md:text-[28px] text-[#e74c3c] group-hover:text-white" />
+                    </button>
+                </div>
             </div>
 
-            {/* Filter Modal */}
             <FilterModal 
                 isOpen={isFilterModalOpen}
                 onClose={() => setIsFilterModalOpen(false)}
                 onApplyFilters={handleApplyFilters}
                 allLocations={allLocations}
                 currentFilters={filters}
+            />
+            
+            <BarcodeScanner 
+                isOpen={isScannerOpen}
+                onClose={() => setIsScannerOpen(false)}
             />
         </header>
     );

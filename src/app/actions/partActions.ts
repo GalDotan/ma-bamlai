@@ -15,7 +15,6 @@ export async function createPart(form: FormData) {  // Pull every field off the 
   const quantityStr= form.get('quantity')?.toString();
   const location   = form.get('location')?.toString()   ?? '';
   const link       = form.get('link')?.toString()       ?? ''; // Ensure link is included
-
   // Basic server‐side check
   if (!name || !partType || yearStr === undefined || quantityStr === undefined || !link) {
     throw new Error('Missing required fields: name, partType, year, quantity, or link');
@@ -23,6 +22,24 @@ export async function createPart(form: FormData) {  // Pull every field off the 
 
   const year     = parseInt(yearStr, 10);
   const quantity = parseInt(quantityStr, 10);
+
+  // Generate unique barcode (format: FRC-YYYY-XXXXX where XXXXX is random)
+  let isUnique = false;
+  let barcode = '';
+  
+  while (!isUnique) {
+    const randomPart = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+    barcode = `FRC-${year}-${randomPart}`;
+    
+    // Check if barcode already exists
+    const existingPart = await prisma.part.findUnique({
+      where: { barcode }
+    });
+    
+    if (!existingPart) {
+      isUnique = true;
+    }
+  }
 
   // Create initial location history entry
   const initialLocationHistory = [
@@ -40,6 +57,7 @@ export async function createPart(form: FormData) {  // Pull every field off the 
       typt,     // New field
       year,
       details,
+      barcode,    // Add generated barcode
       quantity,
       quantityHistory: [],
       location,
@@ -143,6 +161,7 @@ export async function updatePart(id: string, form: FormData) {
 // Get Parts with Search and Filters
 interface FilterParams {
   search?: string;
+  barcode?: string;  // Add barcode parameter
   partTypes?: string[];
   locations?: string[];
   sortBy?: 'name' | 'year' | 'lastEvent' | 'locationHistory';
@@ -161,7 +180,13 @@ export async function getParts(search: string = '', filters?: FilterParams) {
       mode: 'insensitive',
     };
   }
-    // Part types filter (array)
+
+  // Barcode filter
+  if (filters?.barcode) {
+    where.barcode = filters.barcode;
+  }
+
+  // Part types filter (array)
   if (filters?.partTypes && filters.partTypes.length > 0) {
     where.partType = {
       in: filters.partTypes

@@ -3,6 +3,7 @@ import MoveLocationForm from '@/components/MoveLocationForm';
 import EventSection from '@/components/EventSection';
 import { addEvent } from '@/app/actions/partActions';
 import Link from 'next/link';
+import { BarcodeDisplay } from '@/components/BarcodeDisplay';
 
 interface PartViewParams {
   id: string;
@@ -38,6 +39,8 @@ export default async function PartView({ params }: { params: Promise<PartViewPar
             <span className="font-bold text-lg md:text-2xl">Part Name:</span>
             <div className="text-[#e74c3c] font-bold text-lg md:text-2xl break-words">{part.name}</div>
           </div>
+          
+
           <div>
             <span className="font-bold text-lg md:text-2xl">Type:</span>
             <div className="text-[#e74c3c] font-bold text-lg md:text-2xl">{part.partType}</div>
@@ -104,10 +107,12 @@ export default async function PartView({ params }: { params: Promise<PartViewPar
         {/* Actions Section */}
         <div className="lg:col-span-1 flex flex-col gap-3 md:gap-4 mt-6 lg:mt-0">
           <EventSection partId={part.id} addEvent={addEvent} />
-          <MoveLocationForm id={part.id} />
-          <Link href={`/parts/${id}/edit`} className="btn-primary text-sm md:text-lg py-2 md:py-3 px-3 text-center block">
+          <MoveLocationForm id={part.id} />          <Link href={`/parts/${id}/edit`} className="btn-primary text-sm md:text-lg py-2 md:py-3 px-3 text-center block">
             Edit
           </Link>
+          <div className="mt-4 w-full">
+            <BarcodeDisplay barcode={part.barcode} name={part.name} />
+          </div>
         </div>
       </div>
     </div>

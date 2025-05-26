@@ -1,10 +1,13 @@
 import { PartCard } from "@/components/PartCard";
 import { getParts } from "@/app/actions/partActions";
 import NavBar from "@/components/NavBar";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 interface PartsPageProps {
   searchParams: Promise<{ 
     search?: string;
+    barcode: string;  // Add barcode parameter
     partTypes?: string;
     locations?: string;
     sortBy?: 'name' | 'year' | 'lastEvent' | 'locationHistory';
@@ -59,7 +62,21 @@ function parseFilters(searchParams: Record<string, string | undefined>): FilterP
 export default async function PartsList({ searchParams }: PartsPageProps) {
   const resolvedSearchParams = await searchParams;
   const search = resolvedSearchParams.search || '';
-  const filters = parseFilters(resolvedSearchParams);
+  const barcode = resolvedSearchParams.barcode;
+  const filters = parseFilters(resolvedSearchParams);  // If barcode is provided, get the part directly from prisma
+  if (barcode) {
+    const part = await prisma.part.findFirst({
+      where: { 
+        barcode: {
+          equals: barcode
+        }
+      }
+    });
+    if (part) {
+      redirect(`/parts/${part.id}`);
+    }
+  }
+
   const parts = await getParts(search, filters);
 
   return (
