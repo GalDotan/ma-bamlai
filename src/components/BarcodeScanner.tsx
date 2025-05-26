@@ -3,7 +3,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Quagga from '@ericblade/quagga2';
+import Quagga, { QuaggaJSResultObject } from '@ericblade/quagga2';
 
 interface BarcodeScannerProps {
   isOpen: boolean;
@@ -18,52 +18,78 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
 
   useEffect(() => {
     if (!isOpen) return;
-    if (!videoContainer.current) return;
+
+    const container = videoContainer.current;
+    if (!container) {
+      setError('Camera container not ready.');
+      return;
+    }
 
     let active = true;
     setInitializing(true);
 
-    // Initialize Quagga
-    Quagga.init({
-      inputStream: {
-        type: 'LiveStream',
-        target: videoContainer.current as Element,
-        constraints: {
-          facingMode: 'environment',
-        },
-      },
-      decoder: {
-        readers: ['code_128_reader', 'ean_reader', 'upc_reader'],
-      },
-      locate: true,
-    }, (err) => {
-      if (err) {
-        console.error('Quagga init error:', err);
-        setError('Failed to initialize camera.');
+    // Create a hidden video element to ensure the stream is ready
+    const videoEl = document.createElement('video');
+    videoEl.setAttribute('playsinline', 'true');
+    videoEl.style.display = 'none';
+    container.appendChild(videoEl);
+
+    // Request camera stream
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then((stream) => {
+        videoEl.srcObject = stream;
+        videoEl.onloadedmetadata = () => {
+          videoEl.play();
+          // Now safe to init Quagga
+          const onDetected = (result: QuaggaJSResultObject) => {
+            const code = result.codeResult?.code;
+            if (code && active) {
+              Quagga.stop();
+              onClose();
+              router.push(`/parts?barcode=${encodeURIComponent(code)}`);
+            }
+          };
+
+          Quagga.init(
+            {
+              inputStream: {
+                type: 'LiveStream',
+                target: container,
+                constraints: { facingMode: 'environment' },
+              },
+              decoder: { readers: ['code_128_reader', 'ean_reader', 'upc_reader'] },
+              locate: true,
+            },
+            (err) => {
+              if (err) {
+                console.error('Quagga init error:', err);
+                setError('Failed to initialize camera.');
+                setInitializing(false);
+                return;
+              }
+              if (!active) return;
+
+              Quagga.onDetected(onDetected);
+              Quagga.start();
+              setInitializing(false);
+            }
+          );
+        };
+      })
+      .catch(() => {
+        setError('Failed to access camera.');
         setInitializing(false);
-        return;
-      }
-      if (!active) return;
-
-      Quagga.start();
-      setInitializing(false);
-
-      // On detection
-      Quagga.onDetected((result) => {
-        const code = result.codeResult?.code;
-        if (code) {
-          Quagga.stop();
-          onClose();
-          router.push(`/parts?barcode=${encodeURIComponent(code)}`);
-        }
       });
-    });
 
-    // Cleanup
     return () => {
       active = false;
+      // Clean up video element and stream
+      if (videoEl.srcObject) {
+        (videoEl.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+      }
+      videoEl.remove();
       try { Quagga.stop(); } catch {}
-      Quagga.offDetected(() => {});
+      Quagga.offDetected();
       setInitializing(false);
     };
   }, [isOpen, onClose, router]);
