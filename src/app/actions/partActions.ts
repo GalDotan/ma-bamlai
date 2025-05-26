@@ -3,17 +3,6 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
-
-// Type guard for location history (used in movePart)
-function isLocationHistory(arr: unknown): arr is { date: string; from: string | null; to: string }[] {
-  return Array.isArray(arr) && arr.every(entry =>
-    entry && typeof entry === 'object' &&
-    'date' in entry && typeof (entry as Record<string, unknown>).date === 'string' &&
-    'from' in entry && (typeof (entry as Record<string, unknown>).from === 'string' || (entry as Record<string, unknown>).from === null) &&
-    'to' in entry && typeof (entry as Record<string, unknown>).to === 'string'
-  );
-}
 
 // Create Part
 export async function createPart(form: FormData) {  // Pull every field off the FormData and coerce to string
@@ -87,7 +76,7 @@ export async function movePart(form: FormData) {
   const newLocation = form.get('location')?.toString() ?? '';
   if (!id || !newLocation) throw new Error('Missing id or new location');
   const part = await prisma.part.findUnique({ where: { id } });
-  if (!part) throw new Error('Part not found');  const locationHistory = isLocationHistory(part.locationHistory) ? part.locationHistory : [];
+  if (!part) throw new Error('Part not found');  const locationHistory = Array.isArray(part.locationHistory) ? part.locationHistory as { date: string; from: string | null; to: string }[] : [];
   locationHistory.push({
     date: new Date().toISOString(),
     from: part.location,
@@ -197,7 +186,7 @@ interface FilterParams {
 
 export async function getParts(search: string = '', filters?: FilterParams) {
   // Build where clause
-  const where: any = {};
+  const where: Record<string, unknown> = {};
   
   // Search filter
   if (search) {
@@ -235,7 +224,7 @@ export async function getParts(search: string = '', filters?: FilterParams) {
   }
   
   // Build order by clause
-  let orderBy: any = { name: 'asc' }; // default
+  let orderBy: Record<string, unknown> = { name: 'asc' }; // default
   
   if (filters?.sortBy) {
     switch (filters.sortBy) {

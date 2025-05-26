@@ -44,7 +44,7 @@ interface EventHistoryEntry {
   date: Date;
   description: string;
   technician: string;
-}``
+}
 
 // Raw data from Prisma
 interface RawPartData {
