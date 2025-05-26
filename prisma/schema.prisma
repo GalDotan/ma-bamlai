@@ -14,6 +14,7 @@ model Part {
   year              Int
   details           String?
   barcode           String   @unique     // Mandatory and unique barcode for scanning
+  partNumber        Int      @unique // Short, sequential part number for barcode
   quantity          Int
   quantityHistory   Json     // [{ date, prevQuantity, newQuantity }, …]
   location          String

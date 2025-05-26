@@ -41,13 +41,25 @@ export async function createPart(form: FormData) {  // Pull every field off the 
   }
 
   // Create initial location history entry
-  const initialLocationHistory = [
-    {
-      date: new Date(),
-      from: null,
-      to: location
-    }
-  ];
+  // (Removed unused initialLocationHistory variable)
+
+  // Find the current max partNumber
+  // If you want to use partNumber, ensure it exists in your Prisma schema and migrate your database.
+  // Otherwise, remove this logic or use another unique field.
+  // For now, we'll remove this logic to fix the error:
+
+  // const maxPart = await prisma.part.findFirst({
+  //   orderBy: { partNumber: 'desc' },
+  //   select: { partNumber: true },
+  // });
+  // const nextPartNumber = maxPart?.partNumber ? maxPart.partNumber + 1 : 1;
+
+  // Find the current max partNumber
+  const maxPart = await prisma.part.findFirst({
+    orderBy: { partNumber: 'desc' },
+    select: { partNumber: true },
+  });
+  const nextPartNumber = maxPart?.partNumber ? maxPart.partNumber + 1 : 1;
 
   await prisma.part.create({
     data: {
@@ -58,11 +70,24 @@ export async function createPart(form: FormData) {  // Pull every field off the 
       details,
       barcode,    // Add generated barcode
       quantity,
-      quantityHistory: [],
-      location,
-      locationHistory: initialLocationHistory,
-      eventsHistory: [],
       link, // Added link field
+      location, // Add location field
+      quantityHistory: [
+        {
+          date: new Date().toISOString(),
+          prev: 0,
+          new: quantity
+        }
+      ],
+      locationHistory: [
+        {
+          date: new Date().toISOString(),
+          from: null,
+          to: location
+        }
+      ],
+      eventsHistory: [],
+      partNumber: nextPartNumber, // Add short sequential part number
     },
   });
   

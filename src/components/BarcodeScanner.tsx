@@ -27,77 +27,74 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
 
     let active = true;
     setInitializing(true);
+    let pollCount = 0;
+    const maxPolls = 20; // Try for up to 2 seconds (20 x 100ms)
 
-    // Create a hidden video element to ensure the stream is ready
-    const videoEl = document.createElement('video');
-    videoEl.setAttribute('playsinline', 'true');
-    videoEl.style.display = 'none';
-    container.appendChild(videoEl);
-
-    // Request camera stream
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then((stream) => {
-        videoEl.srcObject = stream;
-        videoEl.onloadedmetadata = () => {
-          videoEl.play();
-          // Now safe to init Quagga
-          const onDetected = (result: QuaggaJSResultObject) => {
-            const code = result.codeResult?.code;
-            if (code && active) {
-              Quagga.stop();
-              onClose();
-              router.push(`/parts?barcode=${encodeURIComponent(code)}`);
-            }
-          };
-
-          Quagga.init(
-            {
-              inputStream: {
-                type: 'LiveStream',
-                target: container,
-                constraints: { facingMode: 'environment' },
-              },
-              decoder: { readers: ['code_128_reader', 'ean_reader', 'upc_reader'] },
-              locate: true,
-            },
-            (err) => {
-              if (err) {
-                console.error('Quagga init error:', err);
-                setError('Failed to initialize camera.');
-                setInitializing(false);
-                return;
-              }
-              if (!active) return;
-
-              Quagga.onDetected(onDetected);
-              Quagga.start();
-              setInitializing(false);
-            }
-          );
-        };
-      })
-      .catch(() => {
-        setError('Failed to access camera.');
+    function tryInitQuagga() {
+      if (!container) return;
+      if (!container.isConnected) {
+        setError('Camera container not attached.');
         setInitializing(false);
-      });
+        return;
+      }
+      if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+        if (pollCount < maxPolls) {
+          pollCount++;
+          setTimeout(tryInitQuagga, 100);
+        } else {
+          setError('Camera container not visible.');
+          setInitializing(false);
+        }
+        return;
+      }
+      const onDetected = (result: QuaggaJSResultObject) => {
+        const code = result.codeResult?.code;
+        if (code && active) {
+          Quagga.stop();
+          onClose();
+          router.push(`/parts?barcode=${encodeURIComponent(code)}`);
+        }
+      };
+      Quagga.init(
+        {
+          inputStream: {
+            type: 'LiveStream',
+            target: container as Element,
+            constraints: { facingMode: 'environment' },
+          },
+          decoder: { readers: ['code_128_reader'] },
+          locate: true,
+        },
+        (err) => {
+          if (err) {
+            console.error('Quagga init error:', err);
+            setError('Failed to initialize camera.');
+            setInitializing(false);
+            return;
+          }
+          if (!active) return;
+          Quagga.onDetected(onDetected);
+          Quagga.start();
+          setInitializing(false);
+        }
+      );
+    }
+
+    // Start polling for a visible container
+    setTimeout(tryInitQuagga, 100);
 
     return () => {
       active = false;
-      // Clean up video element and stream
-      if (videoEl.srcObject) {
-        (videoEl.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-      }
-      videoEl.remove();
+      setInitializing(false);
       try { Quagga.stop(); } catch {}
       Quagga.offDetected();
-      setInitializing(false);
     };
   }, [isOpen, onClose, router]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="mt-100 fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="relative w-full max-w-lg p-4 bg-white dark:bg-gray-800 rounded-lg">
         <button
           onClick={onClose}

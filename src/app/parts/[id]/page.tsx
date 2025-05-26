@@ -111,7 +111,7 @@ export default async function PartView({ params }: { params: Promise<PartViewPar
             Edit
           </Link>
           <div className="mt-4 w-full">
-            <BarcodeDisplay barcode={part.barcode} name={part.name} />
+            <BarcodeDisplay barcode={String(part.partNumber)} name={part.name} />
           </div>
         </div>
       </div>
