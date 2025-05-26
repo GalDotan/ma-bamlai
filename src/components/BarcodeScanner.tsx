@@ -50,9 +50,13 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
       const onDetected = (result: QuaggaJSResultObject) => {
         const code = result.codeResult?.code;
         if (code && active) {
+          Quagga.offDetected(onDetected);
           Quagga.stop();
           onClose();
-          router.push(`/parts?barcode=${encodeURIComponent(code)}`);
+          setTimeout(() => {
+            // Redirect to the part with this partNumber, not id
+            router.push(`/parts?partNumber=${encodeURIComponent(code)}`);
+          }, 100);
         }
       };
       Quagga.init(
