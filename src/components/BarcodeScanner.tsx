@@ -22,6 +22,9 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
   const [error, setError] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState(false);
   const [hasInitializedCamera, setHasInitializedCamera] = useState(false);
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(undefined);
+  const [cameraFeatureWarning, setCameraFeatureWarning] = useState<string>('');
 
   const checkBrowserSupport = useCallback(() => {
     // Check HTTPS
@@ -43,55 +46,98 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
     return true;
   }, []);
 
+  // Fetch available video input devices
+  useEffect(() => {
+    if (!isOpen) return;
+    (async () => {
+      if (!navigator.mediaDevices?.enumerateDevices) return;
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter(d => d.kind === 'videoinput');
+        setVideoDevices(videoInputs);
+        if (videoInputs.length > 0 && !selectedDeviceId) {
+          setSelectedDeviceId(videoInputs[0].deviceId);
+        }
+      } catch {
+        // Ignore
+      }
+    })();
+  }, [isOpen, selectedDeviceId]);
+
   const initializeScanner = useCallback(async () => {
     if (!videoRef.current) return;
-    videoRef.current.innerHTML = ''; // Clear any previous content
+    videoRef.current.innerHTML = '';
     setIsInitializing(true);
     setError('');
+    setCameraFeatureWarning('');
 
     try {
-      // First check browser support
       if (!checkBrowserSupport()) {
         setIsInitializing(false);
         return;
       }
-
-      // Ensure mediaDevices is available
       if (!navigator?.mediaDevices?.getUserMedia) {
         setError('Camera access is not supported in your browser.\n\nPlease try:\n1. Using Chrome or Safari\n2. Updating your browser\n3. Using HTTPS');
         setIsInitializing(false);
         return;
       }
-
-      // Stop any existing streams
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
-
-      // Request camera access
+      // Request camera access with selected deviceId if available
+      const baseVideoConstraints: MediaTrackConstraints = {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+      };
+      const videoConstraints: MediaTrackConstraints = { ...baseVideoConstraints };
+      if (selectedDeviceId) {
+        videoConstraints.deviceId = { exact: selectedDeviceId };
+      }
+      const constraints: MediaStreamConstraints = { video: videoConstraints };
+      let stream: MediaStream;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 640 },
-            height: { ideal: 480 }
-          }
-        });
-        
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
         streamRef.current = stream;
-
+        // Try to set zoom/focusMode if supported
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
+          const caps = videoTrack.getCapabilities();
+          // Try to set zoom to max if available
+          if ('zoom' in caps && caps.zoom && typeof caps.zoom === 'object' && 'max' in caps.zoom) {
+            try {
+              const zoomConstraint: unknown = { advanced: [{ zoom: (caps.zoom as { max?: number }).max }] };
+              await videoTrack.applyConstraints(zoomConstraint as MediaTrackConstraints);
+            } catch {
+              setCameraFeatureWarning('Could not set camera zoom.');
+            }
+          }
+          // Try to set focusMode to continuous if available
+          if ('focusMode' in caps) {
+            const focusModes = (caps.focusMode as unknown) as string[];
+            if (Array.isArray(focusModes) && focusModes.includes('continuous')) {
+              try {
+                const focusConstraint: unknown = { advanced: [{ focusMode: 'continuous' }] };
+                await videoTrack.applyConstraints(focusConstraint as MediaTrackConstraints);
+              } catch {
+                setCameraFeatureWarning('Could not set autofocus.');
+              }
+            }
+          } else {
+            setCameraFeatureWarning('Autofocus not supported on this device/browser.');
+          }
+        } else {
+          setCameraFeatureWarning('Advanced camera controls not supported in this browser.');
+        }
         // Create a video element to ensure stream is ready
         const videoElement = document.createElement('video');
         videoElement.srcObject = stream;
         videoElement.play();
-
-        // Wait for video to be ready
         await new Promise<void>((resolve) => {
           videoElement.onloadedmetadata = () => {
             resolve();
           };
         });
-
       } catch (err) {
         console.error('Camera permission error:', err);
         if (err instanceof Error) {
@@ -124,7 +170,11 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
             facingMode: { ideal: "environment" },
             width: { min: 240, ideal: 640, max: 1280 },
             height: { min: 240, ideal: 480, max: 720 },
-            aspectRatio: { min: 1, max: 2 }
+            aspectRatio: { min: 1, max: 2 },
+            // Prefer telephoto lens and enable autofocus if supported
+            // advanced: [
+            //   { zoom: 2 },
+            // ]
           },
           area: {
             top: "25%",
@@ -150,13 +200,12 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
       await Quagga.start();
       setHasInitializedCamera(true);
       console.log('Camera initialized successfully');
-    } catch (err) {
-      console.error('Scanner initialization failed:', err);
+    } catch {
       setError('Failed to start the camera. Please try:\n\n1. Refreshing the page\n2. Checking camera permissions\n3. Using a different browser (Chrome/Safari)');
     } finally {
       setIsInitializing(false);
     }
-  }, [checkBrowserSupport, videoRef]);
+  }, [checkBrowserSupport, videoRef, selectedDeviceId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -215,7 +264,22 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
             ×
           </button>
         </div>
-        
+        {videoDevices.length > 1 && (
+          <div className="mb-2">
+            <label htmlFor="camera-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Camera</label>
+            <select
+              id="camera-select"
+              className="w-full p-2 rounded border border-gray-300 dark:bg-gray-700 dark:text-white"
+              value={selectedDeviceId}
+              onChange={e => setSelectedDeviceId(e.target.value)}
+              disabled={isInitializing}
+            >
+              {videoDevices.map(device => (
+                <option key={device.deviceId} value={device.deviceId}>{device.label || `Camera ${device.deviceId}`}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="relative">
           <div 
             ref={videoRef}
@@ -247,6 +311,11 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+          {cameraFeatureWarning && !error && (
+            <div className="absolute bottom-0 left-0 right-0 bg-yellow-600 bg-opacity-80 text-white text-xs p-2 text-center rounded-b">
+              {cameraFeatureWarning}
             </div>
           )}
         </div>
