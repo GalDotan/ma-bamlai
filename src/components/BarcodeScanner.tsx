@@ -96,49 +96,47 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
             type: 'LiveStream' as const,
             target: container as HTMLElement,
             constraints: {
-              facingMode: 'environment',
-              width: { min: 320, ideal: 640, max: 1920 },
-              height: { min: 240, ideal: 480, max: 1080 }
+              facingMode: 'environment'
             },
-          },
-          locator: {
-            patchSize: 'medium' as const,
-            halfSample: true,
           },
           decoder: {
             readers: [
               'code_128_reader' as const,
               'ean_reader' as const,
-              'ean_8_reader' as const,
               'code_39_reader' as const
             ],
           },
           locate: true,
-          numOfWorkers: navigator.hardwareConcurrency > 2 ? 2 : 1,
           frequency: 10,
-        };
-
-        await new Promise<void>((resolve, reject) => {
+        };        await new Promise<void>((resolve, reject) => {
           Quagga.init(config, (err) => {
             if (err) {
-              console.error('Quagga init error:', err);
+              console.error('Quagga init error details:', {
+                name: err.name,
+                message: err.message,
+                stack: err.stack
+              });
               reject(err);
               return;
             }
             
-            if (!active) return;
+            if (!active) {
+              resolve();
+              return;
+            }
             
             try {
               Quagga.onDetected(onDetected);
               Quagga.start();
               setInitializing(false);
+              console.log('Quagga scanner started successfully');
               resolve();
             } catch (startErr) {
               console.error('Quagga start error:', startErr);
               reject(startErr);
             }
           });
-        });      } catch (err: unknown) {
+        });} catch (err: unknown) {
         console.error('Scanner initialization error:', err);
         if (active) {
           const errorMessage = err instanceof Error ? err.message : String(err);
