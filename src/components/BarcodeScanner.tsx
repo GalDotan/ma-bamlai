@@ -31,10 +31,12 @@ export function BarcodeScanner() {
     config.actionBar.flashButton.visible = true;
     config.actionBar.zoomButton.visible = true;
 
-    const useCase = new ScanbotSDK.UI.Config.MultipleScanningMode();
+    const useCase = new ScanbotSDK.UI.Config.SingleScanningMode();
+    useCase.arOverlay.automaticSelectionEnabled = true;
+    useCase.arOverlay.visible = true;
 
-  useCase.arOverlay.visible = true;
-  useCase.arOverlay.automaticSelectionEnabled = false;
+
+  config.vibration.enabled = true;
 
   config.useCase = useCase;
 
