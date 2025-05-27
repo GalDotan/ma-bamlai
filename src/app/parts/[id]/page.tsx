@@ -107,11 +107,17 @@ export default async function PartView({ params }: { params: Promise<PartViewPar
         {/* Actions Section */}
         <div className="lg:col-span-1 flex flex-col gap-3 md:gap-4 mt-6 lg:mt-0">
           <EventSection partId={part.id} addEvent={addEvent} />
-          <MoveLocationForm id={part.id} />          <Link href={`/parts/${id}/edit`} className="btn-primary text-sm md:text-lg py-2 md:py-3 px-3 text-center block">
+          <MoveLocationForm id={part.id} />
+          <Link href={`/parts/${id}/edit`} className="btn-primary text-sm md:text-lg py-2 md:py-3 px-3 text-center block">
             Edit
           </Link>
-          <div className="mt-4 w-full">
-            <BarcodeDisplay barcode={String(part.partNumber)} name={part.name} />
+          
+          {/* Barcode Display */}
+          <div className="mt-4">
+            <BarcodeDisplay 
+              value={String(part.partNumber)} 
+              name={`Part #${part.partNumber}`} 
+            />
           </div>
         </div>
       </div>

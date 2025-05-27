@@ -4,6 +4,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Quagga, { QuaggaJSResultObject } from '@ericblade/quagga2';
+import { getPartByPartNumber } from '@/app/actions/partActions';
 
 interface BarcodeScannerProps {
   isOpen: boolean;
@@ -46,16 +47,34 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           setInitializing(false);
         }
         return;
-      }
-      const onDetected = (result: QuaggaJSResultObject) => {
+      }      const onDetected = (result: QuaggaJSResultObject) => {
         const code = result.codeResult?.code;
         if (code && active) {
           Quagga.offDetected(onDetected);
           Quagga.stop();
           onClose();
-          setTimeout(() => {
-            // Redirect to the part with this partNumber, not id
-            router.push(`/parts?partNumber=${encodeURIComponent(code)}`);
+          setTimeout(async () => {
+            try {
+              const partNumber = parseInt(code);
+              if (isNaN(partNumber)) {
+                // If not a valid number, search by name
+                router.push(`/parts?search=${encodeURIComponent(code)}`);
+                return;
+              }
+              
+              // Find the part by partNumber and redirect to its view page
+              const part = await getPartByPartNumber(partNumber);
+              if (part) {
+                router.push(`/parts/${part.id}`);
+              } else {
+                // If part not found, redirect to parts list with search
+                router.push(`/parts?search=${encodeURIComponent(code)}`);
+              }
+            } catch (error) {
+              console.error('Error finding part:', error);
+              // Fallback to search
+              router.push(`/parts?search=${encodeURIComponent(code)}`);
+            }
           }, 100);
         }
       };

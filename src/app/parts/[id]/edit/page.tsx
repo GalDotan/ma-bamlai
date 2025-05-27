@@ -52,12 +52,10 @@ interface RawPartData {
   name: string;
   partType: string;
   typt: string;
-  year: number;
-  details: string | null;
+  year: number;  details: string | null;
   quantity: number;
   location: string;
   link: string;
-  barcode: string;
   quantityHistory: RawQuantityHistoryEntry[];
   locationHistory: RawLocationHistoryEntry[];
   eventsHistory: RawEventHistoryEntry[];
@@ -69,14 +67,12 @@ interface RawPartData {
 interface Part {
   id: string;
   name: string;
-  partType: string;
-  typt: string;
+  partType: string;  typt: string;
   year: number;
   details: string | null;
   quantity: number;
   location: string;
   link: string;
-  barcode: string;
   quantityHistory: QuantityHistoryEntry[];
   locationHistory: LocationHistoryEntry[];
   eventsHistory: EventHistoryEntry[];

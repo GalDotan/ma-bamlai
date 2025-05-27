@@ -6,7 +6,7 @@ import { Filter } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import FilterModal from "./FilterModal";
 import { getAllLocations } from "@/app/actions/partActions";
-import { Camera, BarChart } from 'lucide-react';
+import { BarChart, Camera } from 'lucide-react';
 import { BarcodeScanner } from './BarcodeScanner';
 
 interface FilterState {
@@ -18,8 +18,7 @@ interface FilterState {
 }
 
 export default function NavBar() {
-    const [search, setSearch] = useState("");
-    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+    const [search, setSearch] = useState("");    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [allLocations, setAllLocations] = useState<string[]>([]);
     const [filters, setFilters] = useState<FilterState>({
@@ -197,9 +196,7 @@ export default function NavBar() {
                         </button>
                     )}
                 </div>
-            </div>
-
-            <div className="col-start-3 flex items-center gap-1 md:gap-4 justify-self-end mr-2 md:mr-10">
+            </div>            <div className="col-start-3 flex items-center gap-1 md:gap-4 justify-self-end mr-2 md:mr-10">
                 <div className="flex gap-1 md:gap-2">
                     <button
                         className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
@@ -233,9 +230,7 @@ export default function NavBar() {
                         <CiGrid41 size={18} className="md:text-[28px] text-[#e74c3c] group-hover:text-white" />
                     </button>
                 </div>
-            </div>
-
-            <FilterModal 
+            </div>            <FilterModal 
                 isOpen={isFilterModalOpen}
                 onClose={() => setIsFilterModalOpen(false)}
                 onApplyFilters={handleApplyFilters}

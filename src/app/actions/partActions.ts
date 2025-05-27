@@ -18,27 +18,8 @@ export async function createPart(form: FormData) {  // Pull every field off the 
   if (!name || !partType || yearStr === undefined || quantityStr === undefined || !link) {
     throw new Error('Missing required fields: name, partType, year, quantity, or link');
   }
-
   const year     = parseInt(yearStr, 10);
   const quantity = parseInt(quantityStr, 10);
-
-  // Generate unique barcode (format: FRC-YYYY-XXXXX where XXXXX is random)
-  let isUnique = false;
-  let barcode = '';
-  
-  while (!isUnique) {
-    const randomPart = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
-    barcode = `FRC-${year}-${randomPart}`;
-    
-    // Check if barcode already exists
-    const existingPart = await prisma.part.findUnique({
-      where: { barcode }
-    });
-    
-    if (!existingPart) {
-      isUnique = true;
-    }
-  }
 
   // Create initial location history entry
   // (Removed unused initialLocationHistory variable)
@@ -66,9 +47,7 @@ export async function createPart(form: FormData) {  // Pull every field off the 
       name,
       partType, // Updated field name
       typt,     // New field
-      year,
-      details,
-      barcode,    // Add generated barcode
+      year,      details,
       quantity,
       link, // Added link field
       location, // Add location field
@@ -201,7 +180,6 @@ export async function updatePart(id: string, form: FormData) {
 // Get Parts with Search and Filters
 interface FilterParams {
   search?: string;
-  barcode?: string;  // Add barcode parameter
   partTypes?: string[];
   locations?: string[];
   sortBy?: 'name' | 'year' | 'lastEvent' | 'locationHistory';
@@ -220,12 +198,6 @@ export async function getParts(search: string = '', filters?: FilterParams) {
       mode: 'insensitive',
     };
   }
-
-  // Barcode filter
-  if (filters?.barcode) {
-    where.barcode = filters.barcode;
-  }
-
   // Part types filter (array)
   if (filters?.partTypes && filters.partTypes.length > 0) {
     where.partType = {
@@ -305,6 +277,17 @@ export async function getPart(id: string) {
   if (!part) {
     throw new Error('Part not found');
   }
+  
+  return part;
+}
+
+// Find Part by Part Number (for barcode scanning)
+export async function getPartByPartNumber(partNumber: number) {
+  const part = await prisma.part.findFirst({
+    where: {
+      partNumber: partNumber
+    }
+  });
   
   return part;
 }
