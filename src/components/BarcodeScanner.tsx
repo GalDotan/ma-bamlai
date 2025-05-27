@@ -67,13 +67,17 @@ export function BarcodeScanner() {
   };
 
   return (<div>
-    <button
-      className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
-      aria-label="Scan barcode"
-      onClick={startScanner}
-    >
-      <Camera className="w-4 h-4 md:w-6 md:h-6 text-[#e74c3c] group-hover:text-white" />
-    </button>
+          <button
+        className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
+        onClick={startScanner}
+        aria-label="Scan barcode"
+      >
+        {/* fixed 16px on mobile, 24px on desktop */}
+        <Camera
+          size={16}
+          className="md:w-6 md:h-6 text-[#e74c3c] group-hover:text-white"
+        />
+      </button>
     {scanResult && <div>Scanned Part Number: {scanResult}</div>}
   </div>);
 }
