@@ -6,7 +6,7 @@ import { Filter } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import FilterModal from "./FilterModal";
 import { getAllLocations } from "@/app/actions/partActions";
-import { BarChart, Camera } from 'lucide-react';
+import { BarChart } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const BarcodeScanner = dynamic(() => import('./BarcodeScanner').then(mod => mod.BarcodeScanner), { ssr: false });
@@ -199,13 +199,7 @@ export default function NavBar() {
                 </div>
             </div>            <div className="col-start-3 flex items-center gap-1 md:gap-4 justify-self-end mr-2 md:mr-10">
                 <div className="flex gap-1 md:gap-2">
-                    <button
-                        className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
-                        aria-label="Scan barcode"
-                        onClick={() => { /* TODO: implement barcode scanning */ }}
-                    >
-                        <Camera className="w-4 h-4 md:w-6 md:h-6 text-[#e74c3c] group-hover:text-white" />
-                    </button>
+                    <BarcodeScanner/>
                     <button
                         className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
                         aria-label="Go to management"
@@ -239,7 +233,6 @@ export default function NavBar() {
                 currentFilters={filters}
             />
             
-            <BarcodeScanner />
         </header>
     );
 }
