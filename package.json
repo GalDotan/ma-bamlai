@@ -12,6 +12,7 @@
   "dependencies": {
     "@ericblade/quagga2": "^1.8.4",
     "@prisma/client": "^6.8.2",
+    "@types/jsbarcode": "^3.11.4",
     "jsbarcode": "^3.11.6",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
