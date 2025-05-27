@@ -7,7 +7,9 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import FilterModal from "./FilterModal";
 import { getAllLocations } from "@/app/actions/partActions";
 import { BarChart, Camera } from 'lucide-react';
-import { BarcodeScanner } from './BarcodeScanner';
+import dynamic from 'next/dynamic';
+
+const BarcodeScanner = dynamic(() => import('./BarcodeScanner').then(mod => mod.BarcodeScanner), { ssr: false });
 
 interface FilterState {
   partTypes: string[]; // Changed to array for multi-select
@@ -19,7 +21,6 @@ interface FilterState {
 
 export default function NavBar() {
     const [search, setSearch] = useState("");    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-    const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [allLocations, setAllLocations] = useState<string[]>([]);
     const [filters, setFilters] = useState<FilterState>({
       partTypes: [],
@@ -201,7 +202,7 @@ export default function NavBar() {
                     <button
                         className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
                         aria-label="Scan barcode"
-                        onClick={() => setIsScannerOpen(true)}
+                        onClick={() => { /* TODO: implement barcode scanning */ }}
                     >
                         <Camera className="w-4 h-4 md:w-6 md:h-6 text-[#e74c3c] group-hover:text-white" />
                     </button>
@@ -238,10 +239,7 @@ export default function NavBar() {
                 currentFilters={filters}
             />
             
-            <BarcodeScanner 
-                isOpen={isScannerOpen}
-                onClose={() => setIsScannerOpen(false)}
-            />
+            <BarcodeScanner />
         </header>
     );
 }

@@ -1,5 +1,7 @@
 import { Suspense } from "react";
-import NavBar from "@/components/NavBar";
+import dynamic from "next/dynamic";
+
+const NavBar = dynamic(() => import("@/components/NavBar"), { ssr: false });
 
 export default function NotFoundPage() {
   return (

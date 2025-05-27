@@ -6,8 +6,10 @@ import { SubmitButton } from '@/components/SubmitButton';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
 import NavBar from '@/components/NavBar';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 export default function NewPart() {
+  const router = useRouter(); // Initialize router
   const [type, setType] = useState('component');
   const [quantity, setQuantity] = useState(1);
   const [nextPartNumber, setNextPartNumber] = useState<number | null>(null);
@@ -23,8 +25,8 @@ export default function NewPart() {
     try {
       await createPart(formData);
       toast.success('Part created!');
-      // Reset form by reloading the page or using a ref
-      window.location.reload();
+      // Use router.refresh() instead of window.location.reload()
+      router.refresh();
     } catch (error: unknown) {
       const err = error as { message?: string };
       toast.error(err.message || 'Failed to create part');
