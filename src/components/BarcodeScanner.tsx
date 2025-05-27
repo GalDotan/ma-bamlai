@@ -28,9 +28,7 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
 
     let active = true;
     setInitializing(true);
-    setError('');
-
-    async function initializeScanner() {
+    setError('');    async function initializeScanner() {
       try {
         // Check for camera permissions first
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -44,6 +42,35 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           setError('Camera container not available.');
           setInitializing(false);
           return;
+        }        // Test camera access and request main camera with autofocus
+        try {
+          const testStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { exact: 'environment' },
+              width: { min: 640, ideal: 1280, max: 1920 },
+              height: { min: 480, ideal: 720, max: 1080 }
+            }
+          });
+          // Stop test stream immediately
+          testStream.getTracks().forEach(track => track.stop());
+        } catch (exactErr) {
+          console.warn('Exact environment camera failed, trying ideal:', exactErr);
+          // Fallback to ideal if exact fails
+          try {
+            const fallbackStream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: 'environment' },
+                width: { min: 640, ideal: 1280 },
+                height: { min: 480, ideal: 720 }
+              }
+            });
+            fallbackStream.getTracks().forEach(track => track.stop());
+          } catch (fallbackErr) {
+            console.error('Camera access failed:', fallbackErr);
+            setError('Camera access failed. Please check permissions and ensure you have a rear camera available.');
+            setInitializing(false);
+            return;
+          }
         }
 
         // Wait for container to be visible
@@ -96,19 +123,32 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
             type: 'LiveStream' as const,
             target: container as HTMLElement,
             constraints: {
-              facingMode: 'environment'
+              facingMode: { exact: 'environment' },
+              width: { min: 640, ideal: 1280, max: 1920 },
+              height: { min: 480, ideal: 720, max: 1080 }
             },
+            area: {
+              top: "20%",
+              right: "20%", 
+              left: "20%",
+              bottom: "20%"
+            }
+          },
+          locator: {
+            patchSize: 'medium' as const,
+            halfSample: true
           },
           decoder: {
             readers: [
               'code_128_reader' as const,
               'ean_reader' as const,
-              'code_39_reader' as const
+              'code_39_reader' as const,
+              'upc_reader' as const
             ],
           },
           locate: true,
-          frequency: 10,
-        };        await new Promise<void>((resolve, reject) => {
+          frequency: 15
+        };await new Promise<void>((resolve, reject) => {
           Quagga.init(config, (err) => {
             if (err) {
               console.error('Quagga init error details:', {
@@ -123,11 +163,31 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
             if (!active) {
               resolve();
               return;
-            }
-            
-            try {
+            }            try {
               Quagga.onDetected(onDetected);
               Quagga.start();
+              
+              // Enable better camera settings after scanner starts
+              setTimeout(() => {
+                try {
+                  const video = container.querySelector('video');
+                  if (video && video.srcObject) {
+                    const stream = video.srcObject as MediaStream;
+                    const videoTrack = stream.getVideoTracks()[0];
+                    if (videoTrack && 'applyConstraints' in videoTrack) {
+                      videoTrack.applyConstraints({
+                        width: { min: 640, ideal: 1280 },
+                        height: { min: 480, ideal: 720 }
+                      }).catch(err => {
+                        console.log('Camera constraints not supported:', err);
+                      });
+                    }
+                  }
+                } catch (focusErr) {
+                  console.log('Camera setup failed:', focusErr);
+                }
+              }, 1000);
+              
               setInitializing(false);
               console.log('Quagga scanner started successfully');
               resolve();
@@ -177,13 +237,37 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           ×
         </button>        <div
           ref={videoContainer}
-          className="w-full bg-black rounded"
+          className="relative w-full bg-black rounded"
           style={{ 
             imageRendering: 'crisp-edges',
             minHeight: '300px',
             aspectRatio: '4/3'
           }}
-        />
+        >
+          {/* Scanning guide overlay */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="relative w-full h-full">
+              {/* Top and bottom dark overlays */}
+              <div className="absolute top-0 left-0 right-0 h-1/4 bg-black bg-opacity-40"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-black bg-opacity-40"></div>
+              
+              {/* Left and right dark overlays */}
+              <div className="absolute top-1/4 bottom-1/4 left-0 w-1/5 bg-black bg-opacity-40"></div>
+              <div className="absolute top-1/4 bottom-1/4 right-0 w-1/5 bg-black bg-opacity-40"></div>
+              
+              {/* Scanning frame */}
+              <div className="absolute top-1/4 bottom-1/4 left-1/5 right-1/5 border-2 border-red-500 rounded-lg">
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                
+                {/* Scanning line animation */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-red-500 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {initializing && (
           <div className="absolute inset-0 flex items-center justify-center text-white">
@@ -195,10 +279,8 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           <div className="absolute inset-0 flex items-center justify-center text-red-500 p-4 text-center">
             {error}
           </div>
-        )}
-
-        <p className="mt-2 text-sm text-gray-600 text-center">
-          Position the barcode within the frame to scan automatically.
+        )}        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center">
+          Position the barcode within the red scanning area. Hold steady and ensure good lighting for best results.
         </p>
       </div>
     </div>
