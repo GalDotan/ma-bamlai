@@ -29,7 +29,7 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
         width: 3,
         height: 60,
         displayValue: false,
-        margin: 0
+        margin: 0,
       });
       return canvas.toDataURL();
     } catch (error) {
@@ -133,10 +133,10 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               }
                 /* Component Labels - 3x3cm with cutting outline */
               .component-label {
-                width: 30mm;
-                height: 30mm;
+                width: 24mm;
+                height: 24mm;
                 border: 1px solid #000;
-                padding: 3mm;
+                padding: 2mm;
                 page-break-inside: avoid;
                 display: flex;
                 flex-direction: column;
@@ -147,7 +147,7 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               }
               .component-name {
                 font-family: 'Open Sans', Arial, sans-serif;
-                font-size: 20px;
+                font-size: clamp(20px, 4.6vw, 48px); /* Increased the range for larger text */
                 font-weight: 700;
                 color: #000;
                 text-align: center;
@@ -156,7 +156,8 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
-                margin-bottom: 2mm;
+                margin-bottom: 0mm; 
+                margin-top: 0mm
               }
               .component-barcode {
                 text-align: center;
@@ -164,13 +165,15 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                margin-bottom: 0mm; 
+                margin-top: 0mm
               }
                 /* Consumable Name Labels - 1.5x4.5cm with cutting outline */
               .consumable-name-label {
-                width: 45mm;
-                height: 15mm;
+                width: 40mm;
+                height: 13mm;
                 border: 1px solid #000;
-                padding: 3mm;
+                padding: 0mm;
                 page-break-inside: avoid;
                 display: flex;
                 align-items: center;
@@ -181,20 +184,20 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               }
               .consumable-name-text {
                 font-family: 'Open Sans', Arial, sans-serif;
-                font-size: 22px;
+                font-size: clamp(22px, 3.3vw, 52px); /* Increased the range for larger text */
                 font-weight: 700;
                 color: #000;
                 text-align: center;
                 line-height: 1.0;
                 overflow: hidden;
                 display: -webkit-box;
-                -webkit-line-clamp: 2;
+                -webkit-line-clamp: 1;
                 -webkit-box-orient: vertical;
               }
                 /* Consumable Barcode Labels - 3x3cm with cutting outline */
               .consumable-barcode-label {
                 width: 30mm;
-                height: 30mm;
+                height: 20mm;
                 border: 1px solid #000;
                 padding: 3mm;
                 page-break-inside: avoid;
@@ -207,7 +210,7 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               }
               .consumable-part-number {
                 font-family: 'Open Sans', Arial, sans-serif;
-                font-size: 16px;
+                font-size: clamp(18px, 2vw, 40px); /* Increased the range for larger text */
                 font-weight: 600;
                 color: #000;
                 text-align: center;
@@ -222,9 +225,10 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               
               /* Barcode styling */
               .barcode-img {
-                max-width: 100%;
-                max-height: 100%;
+                max-width: 110%;
+                max-height: 110%;
                 object-fit: contain;
+                margin: 0 ;
               }
               
               @media print {
@@ -326,10 +330,10 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
             }
             
             .component-label {
-              width: 30mm;
-              height: 30mm;
+              width: 24mm;
+              height: 24mm;
               border: 1px solid #000;
-              padding: 3mm;
+              padding: 1mm 3mm;
               display: flex;
               flex-direction: column;
               justify-content: space-between;
@@ -339,7 +343,7 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
             }
               .component-name {
               font-family: 'Open Sans', Arial, sans-serif;
-              font-size: 20px;
+              font-size: clamp(20px, 3vw, 48px); /* Increased the range for larger text */
               font-weight: 700;
               color: #000;
               text-align: center;
@@ -348,7 +352,7 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               display: -webkit-box;
               -webkit-line-clamp: 2;
               -webkit-box-orient: vertical;
-              margin-bottom: 2mm;
+              margin-bottom: 0.5mm; /* Made the space between text and barcode really small */
             }
             
             .component-barcode {
@@ -373,7 +377,7 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
             }
               .consumable-name-text {
               font-family: 'Open Sans', Arial, sans-serif;
-              font-size: 22px;
+              font-size: clamp(22px, 3.5vw, 52px); /* Increased the range for larger text */
               font-weight: 700;
               color: #000;
               text-align: center;
@@ -398,7 +402,7 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
             }
               .consumable-part-number {
               font-family: 'Open Sans', Arial, sans-serif;
-              font-size: 16px;
+              font-size: clamp(18px, 2vw, 40px); /* Increased the range for larger text */
               font-weight: 600;
               color: #000;
               text-align: center;
