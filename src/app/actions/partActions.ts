@@ -4,6 +4,15 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 
+// Get next available part number
+export async function getNextPartNumber() {
+  const maxPart = await prisma.part.findFirst({
+    orderBy: { partNumber: 'desc' },
+    select: { partNumber: true },
+  });
+  return maxPart?.partNumber ? maxPart.partNumber + 1 : 1;
+}
+
 // Create Part
 export async function createPart(form: FormData) {  // Pull every field off the FormData and coerce to string
   const name       = form.get('name')?.toString()       ?? '';
@@ -14,33 +23,48 @@ export async function createPart(form: FormData) {  // Pull every field off the 
   const quantityStr= form.get('quantity')?.toString();
   const location   = form.get('location')?.toString()   ?? '';
   const link       = form.get('link')?.toString()       ?? ''; // Ensure link is included
-  // Basic server‐side check
-  if (!name || !partType || yearStr === undefined || quantityStr === undefined || !link) {
-    throw new Error('Missing required fields: name, partType, year, quantity, or link');
+  const partNumberStr = form.get('partNumber')?.toString(); // Manual part number input
+    // Basic server‐side check
+  if (!name || !partType || quantityStr === undefined || !link) {
+    throw new Error('Missing required fields: name, partType, quantity, or link');
   }
-  const year     = parseInt(yearStr, 10);
+  
+  // Year is only required for consumables
+  if (partType === 'consumable' && (!yearStr || yearStr.trim() === '')) {
+    throw new Error('Year is required for consumables');
+  }
+    // Default year to 0 for components if not provided
+  const year = yearStr && yearStr.trim() !== '' ? parseInt(yearStr, 10) : 0;
   const quantity = parseInt(quantityStr, 10);
-
-  // Create initial location history entry
-  // (Removed unused initialLocationHistory variable)
-
-  // Find the current max partNumber
-  // If you want to use partNumber, ensure it exists in your Prisma schema and migrate your database.
-  // Otherwise, remove this logic or use another unique field.
-  // For now, we'll remove this logic to fix the error:
-
-  // const maxPart = await prisma.part.findFirst({
-  //   orderBy: { partNumber: 'desc' },
-  //   select: { partNumber: true },
-  // });
-  // const nextPartNumber = maxPart?.partNumber ? maxPart.partNumber + 1 : 1;
-
-  // Find the current max partNumber
-  const maxPart = await prisma.part.findFirst({
-    orderBy: { partNumber: 'desc' },
-    select: { partNumber: true },
-  });
-  const nextPartNumber = maxPart?.partNumber ? maxPart.partNumber + 1 : 1;
+  
+  // Determine part number
+  let partNumber: number;
+  
+  if (partNumberStr && partNumberStr.trim()) {
+    // Manual part number provided
+    partNumber = parseInt(partNumberStr, 10);
+    
+    if (isNaN(partNumber)) {
+      throw new Error('Part number must be a valid number');
+    }
+    
+    // Check if part number already exists
+    const existingPart = await prisma.part.findUnique({
+      where: { partNumber },
+      select: { id: true }
+    });
+    
+    if (existingPart) {
+      throw new Error(`Part number ${partNumber} already exists`);
+    }
+  } else {
+    // Auto-generate next part number
+    const maxPart = await prisma.part.findFirst({
+      orderBy: { partNumber: 'desc' },
+      select: { partNumber: true },
+    });
+    partNumber = maxPart?.partNumber ? maxPart.partNumber + 1 : 1;
+  }
 
   await prisma.part.create({
     data: {
@@ -66,7 +90,7 @@ export async function createPart(form: FormData) {  // Pull every field off the 
         }
       ],
       eventsHistory: [],
-      partNumber: nextPartNumber, // Add short sequential part number
+      partNumber: partNumber, // Use determined part number
     },
   });
   
@@ -147,17 +171,22 @@ export async function updatePart(id: string, form: FormData) {
   const name = form.get('name')?.toString() ?? '';
   const partType = form.get('partType')?.toString() ?? '';
   const typt = form.get('typt')?.toString() ?? '';
-  const yearStr = form.get('year')?.toString();
-  const details = form.get('details')?.toString() ?? '';
+  const yearStr = form.get('year')?.toString();  const details = form.get('details')?.toString() ?? '';
   const quantityStr = form.get('quantity')?.toString();
   const location = form.get('location')?.toString() ?? '';
   const link = form.get('link')?.toString() ?? '';
 
-  if (!name || !partType || !yearStr || !quantityStr || !location || !link) {
+  if (!name || !partType || !quantityStr || !location || !link) {
     throw new Error('Missing required fields');
   }
+  
+  // Year is only required for consumables
+  if (partType === 'consumable' && (!yearStr || yearStr.trim() === '')) {
+    throw new Error('Year is required for consumables');
+  }
 
-  const year = parseInt(yearStr, 10);
+  // Default year to 0 for components if not provided
+  const year = yearStr && yearStr.trim() !== '' ? parseInt(yearStr, 10) : 0;
   const quantity = parseInt(quantityStr, 10);
   await prisma.part.update({
     where: { id },

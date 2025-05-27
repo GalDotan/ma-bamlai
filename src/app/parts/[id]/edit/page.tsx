@@ -80,10 +80,10 @@ interface Part {
   updatedAt: Date;
 }
 
-export default function EditPartPage() {
-  const { id } = useParams();
+export default function EditPartPage() {  const { id } = useParams();
   const router = useRouter();
   const [part, setPart] = useState<Part | null>(null);
+  const [partType, setPartType] = useState<string>('');
   const [isPending, startTransition] = useTransition();
 
   const parseHistoryEntries = useCallback((data: unknown): Part => {
@@ -109,13 +109,13 @@ export default function EditPartPage() {
       }))
     };
   }, []);
-
   useEffect(() => {
     async function fetchPart() {
       try {
         const partData = await getPart(id as string);
         const parsedPart = parseHistoryEntries(partData);
         setPart(parsedPart);
+        setPartType(parsedPart.partType);
       } catch {
         console.error('Failed to fetch part');
         toast.error('Failed to load part');
@@ -127,15 +127,16 @@ export default function EditPartPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    const formData = new FormData(form);
-
-    // Type-safe form data validation
-    const year = parseInt(formData.get('year') as string);
+    const formData = new FormData(form);    const year = formData.get('year') as string;
     const quantity = parseInt(formData.get('quantity') as string);
-
-    if (isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
-      toast.error('Please enter a valid year');
-      return;
+    
+    // Year validation (only for consumables)
+    if (formData.get('partType') === 'consumable') {
+      const yearValue = parseInt(year);
+      if (isNaN(yearValue) || yearValue < 1900 || yearValue > new Date().getFullYear()) {
+        toast.error('Please enter a valid year');
+        return;
+      }
     }
 
     if (isNaN(quantity) || quantity < 0) {
@@ -168,11 +169,12 @@ export default function EditPartPage() {
           <input id="name" name="name" defaultValue={part.name} required className="form-input text-sm md:text-base" />
         </div>
         <div>
-          <label htmlFor="partType" className="form-label text-sm md:text-base">Type</label>
-          <select
+          <label htmlFor="partType" className="form-label text-sm md:text-base">Type</label>          <select
             id="partType"
             name="partType"
             defaultValue={part.partType}
+            value={partType}
+            onChange={(e) => setPartType(e.target.value)}
             required
             className="form-input text-sm md:text-base"
           >
@@ -181,13 +183,15 @@ export default function EditPartPage() {
           </select>
         </div>
         <div>
-          <label htmlFor="year" className="form-label text-sm md:text-base">Year</label>
+          <label htmlFor="year" className="form-label text-sm md:text-base">
+            Year {partType === 'component' ? '(optional)' : ''}
+          </label>
           <input
             id="year"
             name="year"
             type="text"
-            defaultValue={part.year}
-            required
+            defaultValue={part.year > 0 ? part.year : ''}
+            required={partType !== 'component'}
             className="form-input text-sm md:text-base"
           />
         </div>
