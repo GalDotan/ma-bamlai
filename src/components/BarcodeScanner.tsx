@@ -25,6 +25,19 @@ export function BarcodeScanner() {
   const startScanner = async () => {
     const config = new ScanbotSDK.UI.Config.BarcodeScannerScreenConfiguration();
 
+    config.palette.sbColorPrimary = "#111317";
+    config.palette.sbColorSecondary = "#e74c3c";
+    config.topBar.mode = 'GRADIENT';
+    config.actionBar.flashButton.visible = true;
+    config.actionBar.zoomButton.visible = true;
+
+    const useCase = new ScanbotSDK.UI.Config.MultipleScanningMode();
+
+  useCase.arOverlay.visible = true;
+  useCase.arOverlay.automaticSelectionEnabled = false;
+
+  config.useCase = useCase;
+
     const result = await ScanbotSDK.UI.createBarcodeScanner(config);
 
     if (result && result.items.length > 0) {
