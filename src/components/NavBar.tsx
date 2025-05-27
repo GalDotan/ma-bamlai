@@ -173,7 +173,7 @@ export default function NavBar() {
                                 }
                             }}
                             placeholder="Search..."
-                            className="w-full pl-8 md:pl-12 pr-3 md:pr-4 py-1.5 md:py-2 text-sm md:text-base rounded-full border-none bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e74c3c] shadow-lg transition-all duration-200"
+                            className="w-full pl-8 md:pl-12 pr-3 md:pr-4 py-2 md:py-3 text-sm md:text-base rounded-full border-none bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e74c3c] shadow-lg transition-all duration-200"
                         />
                         <span className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-[#e74c3c]">
                             <svg width="16" height="16" className="md:w-5 md:h-5" fill="none" stroke="#e74c3c" strokeWidth="2" viewBox="0 0 24 24">
@@ -186,20 +186,22 @@ export default function NavBar() {
                     {pathname === '/parts' && (
                         <button
                             onClick={() => setIsFilterModalOpen(true)}
-                            className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full border-2 transition-all duration-150 shadow-md ${
+                            className={`w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full border-2 transition-all duration-150 shadow-md ${
                                 hasActiveFilters 
                                     ? 'bg-[#e74c3c] border-[#e74c3c] text-white' 
                                     : 'bg-gray-800 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] text-[#e74c3c] hover:text-white'
                             }`}
                             aria-label="Filter parts"
                         >
-                            <Filter className="w-4 h-4 md:w-5 md:h-5" />
+                            <Filter className="w-4 h-4 md:w-7 md:h-7" />
                         </button>
+                        
                     )}
+                    <BarcodeScanner/>
                 </div>
             </div>            <div className="col-start-3 flex items-center gap-1 md:gap-4 justify-self-end mr-2 md:mr-10">
                 <div className="flex gap-1 md:gap-2">
-                    <BarcodeScanner/>
+                    
                     <button
                         className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-gray-800 border-2 border-[#e74c3c]/60 hover:bg-[#e74c3c] hover:border-[#e74c3c] transition-all duration-150 shadow-md group"
                         aria-label="Go to management"
@@ -225,7 +227,8 @@ export default function NavBar() {
                         <CiGrid41 size={18} className="md:text-[28px] text-[#e74c3c] group-hover:text-white" />
                     </button>
                 </div>
-            </div>            <FilterModal 
+            </div>        
+                <FilterModal 
                 isOpen={isFilterModalOpen}
                 onClose={() => setIsFilterModalOpen(false)}
                 onApplyFilters={handleApplyFilters}
