@@ -121,13 +121,7 @@ export default function NavBar() {
 
     router.push(`/parts?${params.toString()}`, { scroll: false })
 
-    const hasActiveFilters = filters.partTypes.length > 0 || 
-                           filters.locations.length > 0 || 
-                           filters.sortBy !== 'name' ||
-                           filters.yearRange[0] !== 2000 ||
-                           filters.yearRange[1] !== new Date().getFullYear() ||
-                           filters.lastEventRange[0] !== 0 ||
-                           filters.lastEventRange[1] !== 365;
+
 
     setIsFilterModalOpen(false)
   }

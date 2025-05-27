@@ -144,8 +144,6 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
                 background: white;
                 position: relative;
                 margin: 3mm;
-                outline: 1px solid #000;
-                outline-offset: 3mm;
               }
               .component-name {
                 font-family: 'Open Sans', Arial, sans-serif;
@@ -180,8 +178,6 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
                 background: white;
                 position: relative;
                 margin: 3mm;
-                outline: 1px solid #000;
-                outline-offset: 3mm;
               }
               .consumable-name-text {
                 font-family: 'Open Sans', Arial, sans-serif;
@@ -208,8 +204,6 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
                 background: white;
                 position: relative;
                 margin: 3mm;
-                outline: 1px solid #000;
-                outline-offset: 3mm;
               }
               .consumable-part-number {
                 font-family: 'Open Sans', Arial, sans-serif;
@@ -342,8 +336,6 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               background: white;
               position: relative;
               margin: 3mm;
-              outline: 1px solid #000;
-              outline-offset: 3mm;
             }
               .component-name {
               font-family: 'Open Sans', Arial, sans-serif;
@@ -378,8 +370,6 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               background: white;
               position: relative;
               margin: 3mm;
-              outline: 1px solid #000;
-              outline-offset: 3mm;
             }
               .consumable-name-text {
               font-family: 'Open Sans', Arial, sans-serif;
@@ -405,8 +395,6 @@ export function LabelPrinter({ parts }: LabelPrinterProps) {
               background: white;
               position: relative;
               margin: 3mm;
-              outline: 1px solid #000;
-              outline-offset: 3mm;
             }
               .consumable-part-number {
               font-family: 'Open Sans', Arial, sans-serif;
