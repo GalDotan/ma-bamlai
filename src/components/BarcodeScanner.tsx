@@ -28,110 +28,142 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
 
     let active = true;
     setInitializing(true);
-    let pollCount = 0;
-    const maxPolls = 20; // Try for up to 2 seconds (20 x 100ms)
+    setError('');
 
-    function tryInitQuagga() {
-      if (!container) return;
-      if (!container.isConnected) {
-        setError('Camera container not attached.');
-        setInitializing(false);
-        return;
-      }
-      if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-        if (pollCount < maxPolls) {
-          pollCount++;
-          setTimeout(tryInitQuagga, 100);
-        } else {
+    async function initializeScanner() {
+      try {
+        // Check for camera permissions first
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          setError('Camera not supported by this browser. Please use a modern browser like Chrome, Firefox, or Safari.');
+          setInitializing(false);
+          return;
+        }
+
+        // Ensure container is still available
+        if (!container) {
+          setError('Camera container not available.');
+          setInitializing(false);
+          return;
+        }
+
+        // Wait for container to be visible
+        let attempts = 0;
+        while (attempts < 30 && (container.offsetWidth === 0 || container.offsetHeight === 0)) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+
+        if (container.offsetWidth === 0 || container.offsetHeight === 0) {
           setError('Camera container not visible.');
           setInitializing(false);
+          return;
         }
-        return;
-      }      const onDetected = (result: QuaggaJSResultObject) => {
-        const code = result.codeResult?.code;
-        if (code && active) {
-          Quagga.offDetected(onDetected);
-          Quagga.stop();
-          onClose();
-          setTimeout(async () => {
-            try {
-              const partNumber = parseInt(code);
-              if (isNaN(partNumber)) {
-                // If not a valid number, search by name
+
+        const onDetected = (result: QuaggaJSResultObject) => {
+          const code = result.codeResult?.code;
+          if (code && active) {
+            console.log('Barcode detected:', code);
+            Quagga.offDetected(onDetected);
+            Quagga.stop();
+            onClose();
+            
+            setTimeout(async () => {
+              try {
+                const partNumber = parseInt(code);
+                if (isNaN(partNumber)) {
+                  // If not a valid number, search by name
+                  router.push(`/parts?search=${encodeURIComponent(code)}`);
+                  return;
+                }
+                
+                // Find the part by partNumber and redirect to its view page
+                const part = await getPartByPartNumber(partNumber);
+                if (part) {
+                  router.push(`/parts/${part.id}`);
+                } else {
+                  // If part not found, redirect to parts list with search
+                  router.push(`/parts?search=${encodeURIComponent(code)}`);
+                }
+              } catch (error) {
+                console.error('Error finding part:', error);
+                // Fallback to search
                 router.push(`/parts?search=${encodeURIComponent(code)}`);
-                return;
               }
-              
-              // Find the part by partNumber and redirect to its view page
-              const part = await getPartByPartNumber(partNumber);
-              if (part) {
-                router.push(`/parts/${part.id}`);
-              } else {
-                // If part not found, redirect to parts list with search
-                router.push(`/parts?search=${encodeURIComponent(code)}`);
-              }
-            } catch (error) {
-              console.error('Error finding part:', error);
-              // Fallback to search
-              router.push(`/parts?search=${encodeURIComponent(code)}`);
-            }
-          }, 100);
-        }
-      };
-      Quagga.init(
-        {
+            }, 100);
+          }
+        };        const config = {
           inputStream: {
-            type: 'LiveStream',
-            target: container as Element,
+            type: 'LiveStream' as const,
+            target: container as HTMLElement,
             constraints: {
               facingMode: 'environment',
+              width: { min: 320, ideal: 640, max: 1920 },
+              height: { min: 240, ideal: 480, max: 1080 }
             },
           },
           locator: {
-            patchSize: 'medium',
-            halfSample: false,
+            patchSize: 'medium' as const,
+            halfSample: true,
           },
           decoder: {
-            readers: ['code_128_reader'],
-            debug: {
-              drawBoundingBox: true,
-              showFrequency: true,
-              drawScanline: true,
-              showPattern: true,
-            },
+            readers: [
+              'code_128_reader' as const,
+              'ean_reader' as const,
+              'ean_8_reader' as const,
+              'code_39_reader' as const
+            ],
           },
           locate: true,
-          numOfWorkers: navigator.hardwareConcurrency || 4,
-        },
-        (err) => {
-          if (err) {
-            // Log the full error object for debugging
-            console.error('Quagga init error:', err);
-            setError(
-              'Failed to initialize camera. ' +
-              (err.name ? `${err.name}: ` : '') +
-              (err.message || err.toString() || '') +
-              '\nTry closing other apps/tabs using the camera, check browser permissions, or try a different device.'
-            );
-            setInitializing(false);
-            return;
-          }
-          if (!active) return;
-          Quagga.onDetected(onDetected);
-          Quagga.start();
+          numOfWorkers: navigator.hardwareConcurrency > 2 ? 2 : 1,
+          frequency: 10,
+        };
+
+        await new Promise<void>((resolve, reject) => {
+          Quagga.init(config, (err) => {
+            if (err) {
+              console.error('Quagga init error:', err);
+              reject(err);
+              return;
+            }
+            
+            if (!active) return;
+            
+            try {
+              Quagga.onDetected(onDetected);
+              Quagga.start();
+              setInitializing(false);
+              resolve();
+            } catch (startErr) {
+              console.error('Quagga start error:', startErr);
+              reject(startErr);
+            }
+          });
+        });      } catch (err: unknown) {
+        console.error('Scanner initialization error:', err);
+        if (active) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          setError(
+            'Failed to initialize camera: ' +
+            errorMessage +
+            '\nPlease check camera permissions and try again.'
+          );
           setInitializing(false);
         }
-      );
+      }
     }
 
-    // Start polling for a visible container
-    setTimeout(tryInitQuagga, 100);
+    // Start initialization with a small delay
+    setTimeout(initializeScanner, 200);
 
     return () => {
       active = false;
       setInitializing(false);
-      try { Quagga.stop(); } catch {}
-      Quagga.offDetected();
+      try {
+        Quagga.stop();
+        Quagga.offDetected();
+      } catch (err) {
+        console.warn('Error stopping Quagga:', err);
+      }
     };
   }, [isOpen, onClose, router]);
 
@@ -145,12 +177,14 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           className="absolute top-2 right-2 text-gray-700 hover:text-gray-900"
         >
           ×
-        </button>
-
-        <div
+        </button>        <div
           ref={videoContainer}
-          className="w-full aspect-video bg-black rounded"
-          style={{ imageRendering: 'crisp-edges' }}
+          className="w-full bg-black rounded"
+          style={{ 
+            imageRendering: 'crisp-edges',
+            minHeight: '300px',
+            aspectRatio: '4/3'
+          }}
         />
 
         {initializing && (
