@@ -29,10 +29,16 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
     let active = true;
     setInitializing(true);
     setError('');    async function initializeScanner() {
-      try {
-        // Check for camera permissions first
+      try {        // Check for camera permissions first
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           setError('Camera not supported by this browser. Please use a modern browser like Chrome, Firefox, or Safari.');
+          setInitializing(false);
+          return;
+        }
+
+        // Check if we're in a secure context
+        if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost') {
+          setError('Camera access requires a secure connection (HTTPS) or localhost.');
           setInitializing(false);
           return;
         }
@@ -42,35 +48,63 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           setError('Camera container not available.');
           setInitializing(false);
           return;
-        }        // Test camera access and request main camera with autofocus
+        }        // Test camera access with progressive fallbacks
+        let cameraWorking = false;
+        
+        // Try exact environment first
         try {
           const testStream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: { exact: 'environment' },
-              width: { min: 640, ideal: 1280, max: 1920 },
-              height: { min: 480, ideal: 720, max: 1080 }
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
             }
           });
-          // Stop test stream immediately
           testStream.getTracks().forEach(track => track.stop());
+          cameraWorking = true;
+          console.log('Using exact environment camera');
         } catch (exactErr) {
           console.warn('Exact environment camera failed, trying ideal:', exactErr);
-          // Fallback to ideal if exact fails
+          
+          // Try ideal environment
           try {
             const fallbackStream = await navigator.mediaDevices.getUserMedia({
               video: {
                 facingMode: { ideal: 'environment' },
-                width: { min: 640, ideal: 1280 },
-                height: { min: 480, ideal: 720 }
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
               }
             });
             fallbackStream.getTracks().forEach(track => track.stop());
-          } catch (fallbackErr) {
-            console.error('Camera access failed:', fallbackErr);
-            setError('Camera access failed. Please check permissions and ensure you have a rear camera available.');
-            setInitializing(false);
-            return;
+            cameraWorking = true;
+            console.log('Using ideal environment camera');
+          } catch (idealErr) {
+            console.warn('Ideal environment camera failed, trying any camera:', idealErr);
+            
+            // Try any camera
+            try {
+              const anyStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                  width: { ideal: 640 },
+                  height: { ideal: 480 }
+                }
+              });
+              anyStream.getTracks().forEach(track => track.stop());
+              cameraWorking = true;
+              console.log('Using any available camera');
+            } catch (anyErr) {
+              console.error('No camera access:', anyErr);
+              setError('Camera access failed. Please:\n\n1. Allow camera permissions in your browser\n2. Ensure your device has a camera\n3. Close other apps using the camera\n4. Try refreshing the page');
+              setInitializing(false);
+              return;
+            }
           }
+        }
+
+        if (!cameraWorking) {
+          setError('No camera could be accessed.');
+          setInitializing(false);
+          return;
         }
 
         // Wait for container to be visible
@@ -123,9 +157,9 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
             type: 'LiveStream' as const,
             target: container as HTMLElement,
             constraints: {
-              facingMode: { exact: 'environment' },
-              width: { min: 640, ideal: 1280, max: 1920 },
-              height: { min: 480, ideal: 720, max: 1080 }
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1280, max: 1920 },
+              height: { ideal: 720, max: 1080 }
             },
             area: {
               top: "20%",
@@ -273,13 +307,37 @@ export function BarcodeScanner({ isOpen, onClose }: BarcodeScannerProps) {
           <div className="absolute inset-0 flex items-center justify-center text-white">
             Initializing camera...
           </div>
-        )}
-
-        {error && (
-          <div className="absolute inset-0 flex items-center justify-center text-red-500 p-4 text-center">
-            {error}
+        )}        {error && (
+          <div className="absolute inset-0 flex items-center justify-center text-red-500 p-4 text-center bg-black bg-opacity-80">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg max-w-sm">
+              <p className="text-red-600 dark:text-red-400 mb-4 whitespace-pre-line">{error}</p>
+              <div className="flex gap-2 justify-center">
+                <button
+                  onClick={() => {
+                    setError('');
+                    setInitializing(true);
+                    setTimeout(() => {
+                      const container = videoContainer.current;
+                      if (container) {
+                        // Retry initialization
+                        window.location.reload();
+                      }
+                    }, 100);
+                  }}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Try Again
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
-        )}        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center">
+        )}<p className="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center">
           Position the barcode within the red scanning area. Hold steady and ensure good lighting for best results.
         </p>
       </div>
