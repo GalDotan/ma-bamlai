@@ -6,7 +6,7 @@ import './globals.css';
 export const metadata = {
   title: 'MAbmlai',
   description: 'FRC inventory system',
-  themeColor: '#000000', // this sets the meta tag
+  themeColor: '#111827', // this sets the meta tag
 }
 
 
@@ -16,7 +16,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#111827" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body
         suppressHydrationWarning

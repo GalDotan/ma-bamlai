@@ -3,6 +3,11 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
+html {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background-color: #1f1f1f;
+}
+
 
 :root {
   --background: #111317;
@@ -28,6 +33,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Open Sans', sans-serif;
+  margin: 0;
 }
 
 
