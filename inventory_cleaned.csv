@@ -1,0 +1,187 @@
+partNumber,Unnamed: 1,name,partType,year,location,quantity,link,typt
+1,,USB B Connector,Concumable,0,Black Boxes,3.0,,Connector
+2,,Yellow ferrule,Concumable,0,Black Boxes,92.0,,Ferrule
+3,,30A ATO Breaker,Concumable,0,Black Boxes,10.0,,Breaker
+4,,REV Encoder connecter,Concumable,0,Black Boxes,11.0,,Connector
+5,,5 Port wago,Concumable,0,Black Boxes,11.0,,Connector
+6,,3 Port wago,Concumable,0,Black Boxes,15.0,,Connector
+7,,Rev to ctre incoder connecter,Concumable,0,Black Boxes,7.0,,Connector
+8,,CTRE Encoder extension,Concumable,0,Black Boxes,3.0,,Connector
+9,,Sparkamx breakout board,Concumable,0,Black Boxes,2.0,,Connector
+10,,Blue heat shrink,Concumable,0,Black Boxes,95.0,,Heat Shrink
+11,,Pink heat shrink,Concumable,0,Black Boxes,30.0,,Shrink
+12,,Red heat shrink,Concumable,0,Black Boxes,76.0,,Shrink
+13,,Canbus connector,Concumable,0,Black Boxes,4.0,,Connector
+14,,Inline wago,Concumable,0,Black Boxes,27.0,,Connector
+15,,Red ferrule,Concumable,0,Black Boxes,41.0,,Ferrule
+16,,Gray ferrule ,Concumable,0,Black Boxes,12.0,,Ferrule
+17,,White ferrule ,Concumable,0,Black Boxes,11.0,,Ferrule
+18,,Blue ferrule ,Concumable,0,Black Boxes,7.0,,Ferrule
+19,,Heat shrink with solder,Concumable,0,Black Boxes,27.0,,Soldering
+20,,Zip ties stikers ,Concumable,0,Black Boxes,53.0,,Zip ties
+21,,Clear heat shrink,Concumable,0,Black Boxes,25.0,,Heat shirnk 
+22,,White Anderson ,Concumable,0,Black Boxes,12.0,,Anderson 
+23,,Fuse,Concumable,0,Black Boxes,4.0,,Fuse
+24,,Small limitswitch,Concumable,0,Black Boxes,12.0,,Sensor
+25,,40A ATO PDP Breaker,Concumable,0,Black Boxes,2.0,,Braker 
+26,,Big limitswitch,Concumable,0,Black Boxes,2.0,,Sensor
+27,,Mag coder,Concumable,0,Black Boxes,6.0,,Sensor
+28,,15A Fuse,Concumable,0,Black Boxes,16.0,,Fuse
+29,,20A Fuse small ,Concumable,0,Black Boxes,5.0,,Fuse
+30,,20A Fuse big,Concumable,0,Black Boxes,4.0,,Fuse
+31,,Anderson Metals ,Concumable,0,Black Boxes,48.0,,Anderson 
+32,,Black heat shrink,Concumable,0,Black Boxes,101.0,,Shrink 
+33,,Anderson SB50,Concumable,0,Black Boxes,10.0,,Anderson
+34,,5Oh Resistor,Concumable,0,Black Boxes,87.0,,Resistor
+35,,6 AWG Ring Terminal,Concumable,0,Black Boxes,8.0,,Ring Terminal
+36,,Contacts for SB-50A Anderson,Concumable,0,Black Boxes,21.0,,Anderson
+37,,10-12 AWG Ring Terminal,Concumable,0,Black Boxes,48.0,,Ring Terminal
+38,,Metals for anderson not separated,Concumable,0,Black Boxes,68.0,,Anderson 
+39,,Absulot encoder thrifty bot,Concumable,0,Black Boxes,3.0,,Sensor
+40,,Touch sensore rev,Concumable,0,Black Boxes,6.0,,Sensor
+41,,Logic Level Converter,Concumable,0,Black Boxes,4.0,,Sensor
+42,,Magnetic limit switch ,Concumable,0,Black Boxes,4.0,Sensor,
+43,,Color sensor,Concumable,0,Black Boxes,9.0,Sensor,
+44,,Roborio PowerConnector,Concumable,0,Black Boxes,5.0,Connector,
+45,,Fuse 25a,Concumable,0,Black Boxes,4.0,Fuse,
+46,,Fuse 3a,Concumable,0,Black Boxes,5.0,Fuse,
+47,,,Concumable,0,Black Boxes,,,
+48,,Fuse 30,Concumable,0,Black Boxes,8.0,Fuse,
+49,,Limit Switche,Concumable,0,Black Boxes,1.0,Sensor,
+50,,Yellow shrink,Concumable,0,Black Boxes,9.0,Shrink,
+51,,Green and yellow shrink,Concumable,0,Black Boxes,65.0,Shrink,
+52,,,Concumable,0,,,,
+53,,,Concumable,0,,,,
+54,,,Concumable,0,,,,
+55,,,Concumable,0,,,,
+56,,,Concumable,0,,,,
+57,,Metric adapters,Concumable,0,Yellow boxes,,,Pneumatic connector
+58,,Threaded brass hex,Concumable,0,Yellow boxes,,,Pneumatic connector
+59,,Brass pipe plug,Concumable,0,Yellow boxes,,,Pneumatic connector
+60,,Tube tee,Concumable,0,Yellow boxes,,,Pneumatic connector
+61,,Empty,Concumable,0,Yellow boxes,,,Pneumatic connector
+62,,1/2 NPTF,Concumable,0,Yellow boxes,,,Pneumatic connector
+63,,RO Elbow connector,Concumable,0,Yellow boxes,,,Pneumatic connector
+64,,PTFE Tube quick coupler ,Concumable,0,Yellow boxes,,,Pneumatic connector
+65,,It doesn't exist,Concumable,0,Yellow boxes,,,Pneumatic connector
+66,,Small Male compact,Concumable,0,Yellow boxes,,,Pneumatic connector
+67,,Tube connectors elbow quick fitting,Concumable,0,Yellow boxes,,,Pneumatic connector
+68,,Y tape push lock,Concumable,0,Yellow boxes,,,Pneumatic connector
+69,,does not exist,Concumable,0,Yellow boxes,,,Pneumatic connector
+70,,does not exist,Concumable,0,Yellow boxes,,,Pneumatic connector
+71,,Big Male compact,Concumable,0,Yellow boxes,,,Pneumatic connector
+72,,Flower control regulator,Concumable,0,Yellow boxes,,,Pneumatic connector
+73,,Inline pressure regulator,Concumable,0,Yellow boxes,,,Pneumatic connector
+74,,T Connector,Concumable,0,Yellow boxes,,,Pneumatic connector
+75,,Water pipe connectors,Concumable,0,Yellow boxes,,,Pneumatic connector
+76,,Ucvell plastic pipe in fitting locking blue,Concumable,0,Yellow boxes,,,Pneumatic connector
+77,,Hand valve,Concumable,0,Yellow boxes,,,Pneumatic connector
+78,,Air flow control valve quick connector 6mm,Concumable,0,Yellow boxes,,,Pneumatic connector
+79,,,,0,,,,
+80,,,,0,,,,
+81,,,,0,,,,
+82,,,,0,,,,
+83,,,,0,,,,
+84,,,,0,,,,
+85,,,,0,,,,
+86,,,,0,,,,
+87,,,,0,,,,
+88,,,,0,,,,
+89,,,,0,,,,
+90,,,,0,,,,
+91,,,,0,,,,
+92,,,,0,,,,
+93,,,,0,,,,
+94,,,,0,,,,
+95,,,,0,,,,
+96,,,,0,,,,
+97,,,,0,,,,
+98,,,,0,,,,
+99,,,,0,,,,
+100,,,,0,,,,
+101,,,,0,,,,
+102,,,,0,,,,
+103,,,,0,,,,
+104,,,,0,,,,
+105,,,,0,,,,
+106,,,,0,,,,
+107,,,,0,,,,
+108,,,,0,,,,
+109,,,,0,,,,
+110,,,,0,,,,
+111,,,,0,,,,
+112,,,,0,,,,
+113,,,,0,,,,
+114,,,,0,,,,
+115,,,,0,,,,
+116,,,,0,,,,
+117,,,,0,,,,
+118,,,,0,,,,
+119,,,,0,,,,
+120,,,,0,,,,
+121,,,,0,,,,
+122,,,,0,,,,
+123,,,,0,,,,
+124,,,,0,,,,
+125,,,,0,,,,
+126,,,,0,,,,
+127,,,,0,,,,
+128,,R- 1,Component,0,A,1.0,,roboroio 1
+129,,R - 2,Component,0,A,1.0,,roboroio 2
+130,,R - 3,Component,0,A,1.0,,roboroio 1
+131,,R - 4,Component,0,Training Chassis,1.0,,roboroio 2
+132,,R- 5,Component,0,Suitcase,1.0,,
+133,,L - 1,Component,2025,A,1.0,,Lime light 4
+134,,L -2 ,Component,2025,A,1.0,,Lime light 4
+135,,L - 3,Component,0,A,1.0,,Lime light 3
+136,,L - 4,Component,0,A,1.0,,Lime light 3G
+137,,PDP - 1,Component,0,A,1.0,,PDP
+138,,PDP - 2,Component,0,A,1.0,,PDP
+139,,PDP 3,Component,0,A,1.0,,PDP
+140,,PDP 4,Component,0,Training Chassis,1.0,,PDP
+141,,PDP - 5,Component,0,Suitcase,1.0,,
+142,,NR - 1,Component,2025,A,1.0,,new radio
+143,,NR - 2,Component,2025,A,1.0,,new radio
+144,,OR - 1,Component,0,A,1.0,,old radio
+145,,OR - 2,Component,0,A,1.0,,old radio
+146,,OR - 3,Component,0,A,1.0,,old radio
+147,,OR - 4,Component,0,A,1.0,,old radio
+148,,OR - 5,Component,0,A,1.0,,old radio
+149,,OR - 6,Component,0,A,1.0,,old radio
+150,,OR - 7,Component,0,A,1.0,,old radio
+151,,OR - 8,Component,0,Training Chassis,1.0,,old radio
+152,,PDH - 1,Component,0,A,1.0,,PDH
+153,,V - 1,Component,0,A,1.0,,VRM
+154,,V - 2,Component,0,A,1.0,,VRM
+155,,V - 3,Component,0,A,1.0,,VRM
+156,,V - 4,Component,0,A,1.0,,VRM
+157,,V - 5,Component,0,Training Chassis,1.0,,VRM
+158,,V - 6,Component,0,Suitcase,1.0,,
+159,,PCM - 1,Component,0,A,1.0,,PCM
+160,,PCM - 2,Component,0,A,1.0,,PCM
+161,,PCM - 3,Component,0,A,1.0,,PCM
+162,,C - 1,Component,0,A,1.0,,CANIVOR
+163,,P - 1,Component,0,A,1.0,,PIGEON
+164,,RPM - 1,Component,0,A,1.0,,RPM
+165,,RPM - 2,Component,0,A,1.0,,RPM
+166,,SM - 1,Component,0,A,1.0,,Spark Max
+167,,SM - 2,Component,0,A,1.0,,Spark Max
+168,,SM - 3,Component,0,Training Chassis,1.0,,Spark Max
+169,,SM - 4,Component,0,Training Chassis,1.0,,Spark Max
+170,,SM - 5,Component,0,Training Chassis,1.0,,Spark Max
+171,,SM - 6,Component,0,Training Chassis,1.0,,Spark Max
+172,,SM - 7,Component,0,Training Chassis,1.0,,Spark Max
+173,,SM - 8,Component,0,Training Chassis,1.0,,Spark Max
+174,,SM - 9,Component,0,Training Chassis,1.0,,Spark Max
+175,,SM - 10,Component,0,Training Chassis,1.0,,Spark Max
+176,,SM - 11,Component,0,Suitcase,1.0,,Spark Max
+177,,SM - 12,Component,0,Suitcase,1.0,,Spark Max
+178,,SM - 13,Component,0,Suitcase,1.0,,Spark Max
+179,,SM - 14,Component,0,Suitcase,1.0,,Spark Max
+180,,S - 1,Component,0,A,1.0,,Switch
+181,,S - 2,Component,0,A,1.0,,TP link Switch
+182,,S - 3,Component,0,A,1.0,,TP link Switch
+183,,PH- 1,Component,0,A,1.0,,PH - Pneumatic Hub
+184,, PH- 2,Component,0,A,1.0,,PH - Pneumatic Hub
+185,,LED-1,Component,0,A,1.0,,LEDs
+186,,RSL,Concumable,0,A,6.0,,RSL
